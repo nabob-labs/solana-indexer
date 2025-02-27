@@ -1,0 +1,18 @@
+[package]
+name = "solana-indexer-decoding-memo-program"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+solana-indexer-core = { workspace = true }
+serde = { workspace = true }
+solana-sdk = { workspace = true }
+spl-memo = { workspace = true }
+spl-token = { workspace = true }

@@ -1,0 +1,15 @@
+{%- if account.requires_imports %}
+use super::super::types::*;
+{%- endif %}
+{% raw %} 
+use solana_indexer_core::{borsh, IndexerDeserialize};
+
+#[derive(IndexerDeserialize, Debug)]
+{% endraw %} 
+
+#[indexer(discriminator = "{{account.discriminator }}")]
+pub struct {{ account.struct_name }} { 
+    {%- for field in account.fields %} 
+        pub {{ field.name }}: {{ field.rust_type }}, 
+    {%- endfor %} 
+}

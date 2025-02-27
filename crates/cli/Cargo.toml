@@ -1,0 +1,32 @@
+[package]
+name = "solana-indexer-cli"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "solana-indexer-cli"
+path = "src/main.rs"
+
+[dependencies]
+solana-indexer-core = { workspace = true }
+solana-client = { workspace = true }
+solana-sdk = { workspace = true }
+solana-transaction-status = { workspace = true }
+
+anyhow = { workspace = true }
+askama = { workspace = true }
+borsh = { workspace = true, features = ["derive"] }
+clap = { workspace = true, features = ["derive"] }
+console = { workspace = true }
+dialoguer = { workspace = true, default-features = false, features = ["editor"] }
+flate2 = { workspace = true }
+heck = { workspace = true }
+hex = { workspace = true }
+indicatif = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sha2 = { workspace = true }

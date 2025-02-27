@@ -1,0 +1,47 @@
+use solana_indexer_core::{borsh, IndexerDeserialize};
+
+#[derive(
+    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
+)]
+#[indexer(discriminator = "0x2574cd67f3c05cc6")]
+pub struct WithdrawObligationCollateral {
+    pub collateral_amount: u64,
+}
+
+pub struct WithdrawObligationCollateralInstructionAccounts {
+    pub owner: solana_sdk::pubkey::Pubkey,
+    pub obligation: solana_sdk::pubkey::Pubkey,
+    pub lending_market: solana_sdk::pubkey::Pubkey,
+    pub lending_market_authority: solana_sdk::pubkey::Pubkey,
+    pub withdraw_reserve: solana_sdk::pubkey::Pubkey,
+    pub reserve_source_collateral: solana_sdk::pubkey::Pubkey,
+    pub user_destination_collateral: solana_sdk::pubkey::Pubkey,
+    pub token_program: solana_sdk::pubkey::Pubkey,
+    pub instruction_sysvar_account: solana_sdk::pubkey::Pubkey,
+}
+
+impl solana_indexer_core::deserialize::ArrangeAccounts for WithdrawObligationCollateral {
+    type ArrangedAccounts = WithdrawObligationCollateralInstructionAccounts;
+
+    fn arrange_accounts(
+        accounts: &[solana_sdk::instruction::AccountMeta],
+    ) -> Option<Self::ArrangedAccounts> {
+        let [owner, obligation, lending_market, lending_market_authority, withdraw_reserve, reserve_source_collateral, user_destination_collateral, token_program, instruction_sysvar_account, _remaining @ ..] =
+            accounts
+        else {
+            return None;
+        };
+
+        Some(WithdrawObligationCollateralInstructionAccounts {
+            owner: owner.pubkey,
+            obligation: obligation.pubkey,
+            lending_market: lending_market.pubkey,
+            lending_market_authority: lending_market_authority.pubkey,
+            withdraw_reserve: withdraw_reserve.pubkey,
+            reserve_source_collateral: reserve_source_collateral.pubkey,
+            user_destination_collateral: user_destination_collateral.pubkey,
+            token_program: token_program.pubkey,
+            instruction_sysvar_account: instruction_sysvar_account.pubkey,
+        })
+    }
+}

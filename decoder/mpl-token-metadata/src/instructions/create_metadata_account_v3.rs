@@ -1,0 +1,46 @@
+use {
+    super::super::types::*,
+    solana_indexer_core::{borsh, IndexerDeserialize},
+};
+
+#[derive(
+    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
+)]
+#[indexer(discriminator = "0x21")]
+pub struct CreateMetadataAccountV3 {
+    pub create_metadata_account_args_v3: CreateMetadataAccountArgsV3,
+}
+
+pub struct CreateMetadataAccountV3InstructionAccounts {
+    pub metadata: solana_sdk::pubkey::Pubkey,
+    pub mint: solana_sdk::pubkey::Pubkey,
+    pub mint_authority: solana_sdk::pubkey::Pubkey,
+    pub payer: solana_sdk::pubkey::Pubkey,
+    pub update_authority: solana_sdk::pubkey::Pubkey,
+    pub system_program: solana_sdk::pubkey::Pubkey,
+    pub rent: solana_sdk::pubkey::Pubkey,
+}
+
+impl solana_indexer_core::deserialize::ArrangeAccounts for CreateMetadataAccountV3 {
+    type ArrangedAccounts = CreateMetadataAccountV3InstructionAccounts;
+
+    fn arrange_accounts(
+        accounts: &[solana_sdk::instruction::AccountMeta],
+    ) -> Option<Self::ArrangedAccounts> {
+        let [metadata, mint, mint_authority, payer, update_authority, system_program, rent, _remaining @ ..] =
+            accounts
+        else {
+            return None;
+        };
+
+        Some(CreateMetadataAccountV3InstructionAccounts {
+            metadata: metadata.pubkey,
+            mint: mint.pubkey,
+            mint_authority: mint_authority.pubkey,
+            payer: payer.pubkey,
+            update_authority: update_authority.pubkey,
+            system_program: system_program.pubkey,
+            rent: rent.pubkey,
+        })
+    }
+}

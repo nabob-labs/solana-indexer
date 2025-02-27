@@ -1,0 +1,146 @@
+[workspace]
+members = [
+    "crates/macros",
+    "crates/proc-macros",
+    "crates/core",
+    "crates/cli",
+    "datasource/rpc-block-subscribe",
+    "datasource/rpc-program-subscribe",
+    "datasource/rpc-transaction-crawler",
+    "datasource/grpc-highway-gateway",
+    "decoder/drift-v2",
+    "decoder/fluxbeam",
+    "decoder/jupiter-dca",
+    "decoder/jupiter-limit-order-2",
+    "decoder/jupiter-limit-order",
+    "decoder/jupiter-perpetuals",
+    "decoder/jupiter-swap",
+    "decoder/kamino-lending",
+    "decoder/kamino-vault",
+    "decoder/lifinity-amm-v2",
+    "decoder/memo-program",
+    "decoder/meteora-dlmm",
+    "decoder/moonshot",
+    "decoder/mpl-core",
+    "decoder/mpl-token-metadata",
+    "decoder/name-service",
+    "decoder/openbook-v2",
+    "decoder/orca-whirlpool",
+    "decoder/phoenix-v1",
+    "decoder/pumpfun",
+    "decoder/raydium-amm-v4",
+    "decoder/raydium-clmm",
+    "decoder/raydium-cpmm",
+    "decoder/raydium-liquidity-locking",
+    "decoder/sharky",
+    "decoder/spl-associated-token-account",
+    "decoder/stabble-stable-swap",
+    "decoder/stabble-weighted-swap",
+    "decoder/system-program",
+    "decoder/token-2022",
+    "decoder/token-program",
+    "decoder/zeta",
+]
+
+resolver = "2"
+
+[workspace.package]
+version = "2.1.13"
+authors = ["Bovey Maintainers <maintainers@solana.xyz>"]
+repository = "https://github.com/nabob-labs/solana-indexer"
+homepage = "https://solana.xyz/"
+license = "Apache-2.0"
+edition = "2021"
+
+[workspace.dependencies]
+solana-indexer-macros = { path = "crates/macros" }
+solana-indexer-proc-macros = { path = "crates/proc-macros" }
+solana-indexer-core = { path = "crates/core" }
+solana-indexer-cli = { path = "crates/cli" }
+solana-indexer-datasource-rpc-block-subscribe = { path = "datasource/rpc-block-subscribe" }
+solana-indexer-datasource-rpc-program-subscribe = { path = "datasource/rpc-program-subscribe" }
+solana-indexer-datasource-rpc-transaction-crawler = { path = "datasource/rpc-transaction-crawler" }
+solana-indexer-datasource-grpc-highway-gateway = { path = "datasource/grpc-highway-gateway" }
+solana-indexer-decoding-drift-v2 = { path = "decoder/drift-v2" }
+solana-indexer-decoding-fluxbeam = { path = "decoder/fluxbeam" }
+solana-indexer-decoding-jupiter-dca = { path = "decoder/jupiter-dca" }
+solana-indexer-decoding-jupiter-limit-order-2 = { path = "decoder/jupiter-limit-order-2" }
+solana-indexer-decoding-jupiter-limit-order = { path = "decoder/jupiter-limit-order" }
+solana-indexer-decoding-jupiter-perpetuals = { path = "decoder/jupiter-perpetuals" }
+solana-indexer-decoding-jupiter-swap = { path = "decoder/jupiter-swap" }
+solana-indexer-decoding-kamino-lending = { path = "decoder/kamino-lending" }
+solana-indexer-decoding-kamino-vault = { path = "decoder/kamino-vault" }
+solana-indexer-decoding-lifinity-amm-v2 = { path = "decoder/lifinity-amm-v2" }
+solana-indexer-decoding-memo-program = { path = "decoder/memo-program" }
+solana-indexer-decoding-meteora-dlmm = { path = "decoder/meteora-dlmm" }
+solana-indexer-decoding-moonshot = { path = "decoder/moonshot" }
+solana-indexer-decoding-mpl-core = { path = "decoder/mpl-core" }
+solana-indexer-decoding-mpl-token-metadata = { path = "decoder/mpl-token-metadata" }
+solana-indexer-decoding-name-service = { path = "decoder/name-service" }
+solana-indexer-decoding-openbook-v2 = { path = "decoder/openbook-v2" }
+solana-indexer-decoding-orca-whirlpool = { path = "decoder/orca-whirlpool" }
+solana-indexer-decoding-phoenix-v1 = { path = "decoder/phoenix-v1" }
+solana-indexer-decoding-pumpfun = { path = "decoder/pumpfun" }
+solana-indexer-decoding-raydium-amm-v4 = { path = "decoder/raydium-amm-v4" }
+solana-indexer-decoding-raydium-clmm = { path = "decoder/raydium-clmm" }
+solana-indexer-decoding-raydium-cpmm = { path = "decoder/raydium-cpmm" }
+solana-indexer-decoding-raydium-liquidity-locking = { path = "decoder/raydium-liquidity-locking" }
+solana-indexer-decoding-sharky = { path = "decoder/sharky" }
+solana-indexer-decoding-spl-associated-token-account = { path = "decoder/spl-associated-token-account" }
+solana-indexer-decoding-stabble-stable-swap = { path = "decoder/stabble-stable-swap" }
+solana-indexer-decoding-stabble-weighted-swap = { path = "decoder/stabble-weighted-swap" }
+solana-indexer-decoding-system-program = { path = "decoder/system-program" }
+solana-indexer-decoding-token-2022 = { path = "decoder/token-2022" }
+solana-indexer-decoding-token-program = { path = "decoder/token-program" }
+solana-indexer-decoding-zeta = { path = "decoder/zeta" }
+
+solana-account = { git = "https://github.com/nabob-labs/solana-spe.git" }
+solana-client = { git = "https://github.com/nabob-labs/solana-spe.git" }
+solana-sdk = { git = "https://github.com/nabob-labs/solana-spe.git" }
+solana-transaction-status = { git = "https://github.com/nabob-labs/solana-spe.git" }
+spl-memo = { git = "https://github.com/nabob-labs/solana-spe.git" }
+spl-token = { git = "https://github.com/nabob-labs/solana-spe.git" }
+
+# other
+anyhow = "1.0.96"
+askama = "0.12.1"
+async-stream = "0.3.6"
+async-trait = { version = "0.1.86" }
+bincode = "1.3.3"
+borsh = { version = "1.5.1" }
+borsh-derive-internal = "0.10.3"
+bs58 = "0.5.1"
+clap = { version = "4.5.30", features = ["derive"] }
+console = "0.15.8"
+dialoguer = { version = "0.11.0", default-features = false, features = ["editor"] }
+dotenv = "0.15.0"
+env_logger = "0.11.5"
+flate2 = "1.0.35"
+futures = "0.3.30"
+futures-util = "0.3.31"
+heck = "0.5.0"
+hex = "0.4.3"
+indicatif = "0.17.8"
+log = "0.4.25"
+metrics = "0.24.1"
+metrics-exporter-prometheus = "0.16.0"
+paste = "1.0.15"
+proc-macro2 = "1"
+quote = "1.0"
+retry = "2.0.0"
+serde = { version = "1.0.208", features = ["derive"] }
+serde-big-array = "0.5.1"
+serde_json = "1.0.138"
+sha2 = "0.10.8"
+syn = { version = "1.0", features = ["full"] }
+thiserror = "1.0.63"
+tokio = { version = "1.43.0" }
+tokio-retry = "0.3.0"
+tokio-util = "0.7.13"
+unicode-xid = "0.2"
+solana-grpc-client = { git = "https://github.com/nabob-labs/solana-grpc.git" }
+solana-grpc-proto = { git = "https://github.com/nabob-labs/solana-grpc.git"}
+
+[patch.crates-io.curve25519-dalek]
+git = "https://github.com/anza-xyz/curve25519-dalek.git"
+rev = "b500cdc2a920cd5bff9e2dd974d7b97349d61464"

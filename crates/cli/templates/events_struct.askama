@@ -1,0 +1,15 @@
+{%- if event.requires_imports %}
+use super::super::types::*;
+{%- endif %}
+{% raw %}
+use solana_indexer_core::{borsh, IndexerDeserialize};
+{% endraw %}
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
+#[indexer(discriminator = "{{ event.discriminator }}")]
+pub struct {{ event.struct_name }}{
+    {%- for arg in event.args %}
+    pub {{ arg.name }}: {{ arg.rust_type }},
+    {%- endfor %}
+}
+

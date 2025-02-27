@@ -1,0 +1,28 @@
+[package]
+name = "solana-indexer-datasource-rpc-transaction-crawler"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+solana-client = { workspace = true }
+solana-sdk = { workspace = true }
+solana-transaction-status = { workspace = true }
+
+solana-indexer-core = { workspace = true }
+
+async-stream = { workspace = true }
+async-trait = { workspace = true }
+env_logger = { workspace = true }
+futures = { workspace = true }
+log = { workspace = true }
+retry = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tokio-retry = { workspace = true }
+tokio-util = { workspace = true }

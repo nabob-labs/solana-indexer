@@ -1,0 +1,39 @@
+use {
+    super::super::types::*,
+    solana_indexer_core::{borsh, IndexerDeserialize},
+};
+
+#[derive(
+    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
+)]
+#[indexer(discriminator = "0x01")]
+pub struct CreateCollectionV1 {
+    pub create_collection_v1_args: CreateCollectionV1Args,
+}
+
+pub struct CreateCollectionV1InstructionAccounts {
+    pub collection: solana_sdk::pubkey::Pubkey,
+    pub update_authority: solana_sdk::pubkey::Pubkey,
+    pub payer: solana_sdk::pubkey::Pubkey,
+    pub system_program: solana_sdk::pubkey::Pubkey,
+}
+
+impl solana_indexer_core::deserialize::ArrangeAccounts for CreateCollectionV1 {
+    type ArrangedAccounts = CreateCollectionV1InstructionAccounts;
+
+    fn arrange_accounts(
+        accounts: &[solana_sdk::instruction::AccountMeta],
+    ) -> Option<Self::ArrangedAccounts> {
+        let [collection, update_authority, payer, system_program, _remaining @ ..] = accounts
+        else {
+            return None;
+        };
+
+        Some(CreateCollectionV1InstructionAccounts {
+            collection: collection.pubkey,
+            update_authority: update_authority.pubkey,
+            payer: payer.pubkey,
+            system_program: system_program.pubkey,
+        })
+    }
+}
