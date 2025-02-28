@@ -4358,6 +4358,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "solana-indexer-decoding-okx-dex"
+version = "2.1.13"
+dependencies = [
+ "serde",
+ "solana-indexer-core",
+ "solana-sdk",
+]
+
+[[package]]
 name = "solana-indexer-decoding-openbook-v2"
 version = "2.1.13"
 dependencies = [

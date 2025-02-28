@@ -40,6 +40,7 @@ members = [
     "decoder/token-2022",
     "decoder/token-program",
     "decoder/zeta",
+    "decoder/okx-dex",
 ]
 
 resolver = "2"
@@ -77,6 +78,7 @@ solana-indexer-decoding-moonshot = { path = "decoder/moonshot" }
 solana-indexer-decoding-mpl-core = { path = "decoder/mpl-core" }
 solana-indexer-decoding-mpl-token-metadata = { path = "decoder/mpl-token-metadata" }
 solana-indexer-decoding-name-service = { path = "decoder/name-service" }
+solana-indexer-decoding-okx-dex = { path = "decoder/okx-dex" }
 solana-indexer-decoding-openbook-v2 = { path = "decoder/openbook-v2" }
 solana-indexer-decoding-orca-whirlpool = { path = "decoder/orca-whirlpool" }
 solana-indexer-decoding-phoenix-v1 = { path = "decoder/phoenix-v1" }
