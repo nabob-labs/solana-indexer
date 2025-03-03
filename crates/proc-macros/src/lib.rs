@@ -15,7 +15,7 @@
 //!
 //! ## Key Features
 //!
-//! - **IndexerDeserialize`**: Automatically implement the `IndexerDeserialize`
+//! - **`IndexerDeserialize`**: Automatically implement the `IndexerDeserialize`
 //!   trait for structs and enums, enabling Borsh-based deserialization with
 //!   optional discriminators for type validation.
 //! - **`Instruction Decoder Collection`**: Create and manage complex

@@ -1,22 +1,6 @@
 use {
     async_trait::async_trait,
-    solana_indexer_core::{
-        datasource::{
-            AccountDeletion, AccountUpdate, Datasource, TransactionUpdate, Update, UpdateType,
-        },
-        error::IndexerResult,
-        metrics::MetricsCollection,
-    },
     futures::{sink::SinkExt, StreamExt},
-    solana_sdk::{account::Account, pubkey::Pubkey, signature::Signature},
-    std::{
-        collections::{HashMap, HashSet},
-        convert::TryFrom,
-        sync::Arc,
-        time::Duration,
-    },
-    tokio::sync::{mpsc::UnboundedSender, RwLock},
-    tokio_util::sync::CancellationToken,
     solana_grpc_client::GeyserGrpcClient,
     solana_grpc_proto::{
         convert_from::{create_tx_meta, create_tx_versioned},
@@ -27,10 +11,26 @@ use {
         },
         tonic::transport::ClientTlsConfig,
     },
+    solana_indexer_core::{
+        datasource::{
+            AccountDeletion, AccountUpdate, Datasource, TransactionUpdate, Update, UpdateType,
+        },
+        error::IndexerResult,
+        metrics::MetricsCollection,
+    },
+    solana_sdk::{account::Account, pubkey::Pubkey, signature::Signature},
+    std::{
+        collections::{HashMap, HashSet},
+        convert::TryFrom,
+        sync::Arc,
+        time::Duration,
+    },
+    tokio::sync::{mpsc::UnboundedSender, RwLock},
+    tokio_util::sync::CancellationToken,
 };
 
 #[derive(Debug)]
-pub struct YellowstoneGrpcGeyserClient {
+pub struct SolanaGrpcGeyserClient {
     pub endpoint: String,
     pub x_token: Option<String>,
     pub commitment: Option<CommitmentLevel>,
@@ -39,7 +39,7 @@ pub struct YellowstoneGrpcGeyserClient {
     pub account_deletions_tracked: Arc<RwLock<HashSet<Pubkey>>>,
 }
 
-impl YellowstoneGrpcGeyserClient {
+impl SolanaGrpcGeyserClient {
     pub fn new(
         endpoint: String,
         x_token: Option<String>,
@@ -48,7 +48,7 @@ impl YellowstoneGrpcGeyserClient {
         transaction_filters: HashMap<String, SubscribeRequestFilterTransactions>,
         account_deletions_tracked: Arc<RwLock<HashSet<Pubkey>>>,
     ) -> Self {
-        YellowstoneGrpcGeyserClient {
+        SolanaGrpcGeyserClient {
             endpoint,
             x_token,
             commitment,
@@ -60,7 +60,7 @@ impl YellowstoneGrpcGeyserClient {
 }
 
 #[async_trait]
-impl Datasource for YellowstoneGrpcGeyserClient {
+impl Datasource for SolanaGrpcGeyserClient {
     async fn consume(
         &self,
         sender: &UnboundedSender<Update>,
@@ -76,16 +76,24 @@ impl Datasource for YellowstoneGrpcGeyserClient {
         let account_deletions_tracked = self.account_deletions_tracked.clone();
 
         let mut geyser_client = GeyserGrpcClient::build_from_shared(endpoint)
-            .map_err(|err| solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string()))?
+            .map_err(|err| {
+                solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string())
+            })?
             .x_token(x_token)
-            .map_err(|err| solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string()))?
+            .map_err(|err| {
+                solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string())
+            })?
             .connect_timeout(Duration::from_secs(15))
             .timeout(Duration::from_secs(15))
             .tls_config(ClientTlsConfig::new().with_enabled_roots())
-            .map_err(|err| solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string()))?
+            .map_err(|err| {
+                solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string())
+            })?
             .connect()
             .await
-            .map_err(|err| solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string()))?;
+            .map_err(|err| {
+                solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string())
+            })?;
 
         tokio::spawn(async move {
             let subscribe_request = SubscribeRequest {
@@ -229,6 +237,7 @@ impl Datasource for YellowstoneGrpcGeyserClient {
                                                         meta: meta_original,
                                                         is_vote: transaction_info.is_vote,
                                                         slot: transaction_update.slot,
+                                                        block_time: None,
                                                     }));
                                                     if let Err(e) = sender.send(update) {
                                                         log::error!("Failed to send transaction update with signature {:?} at slot {}: {:?}", signature, transaction_update.slot, e);
