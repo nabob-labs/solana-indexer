@@ -4,6 +4,8 @@ members = [
     "crates/proc-macros",
     "crates/core",
     "crates/cli",
+    "metrics/log",
+    "metrics/prometheus",
     "datasource/rpc-block-subscribe",
     "datasource/rpc-program-subscribe",
     "datasource/rpc-transaction-crawler",
@@ -58,6 +60,8 @@ solana-indexer-macros = { path = "crates/macros" }
 solana-indexer-proc-macros = { path = "crates/proc-macros" }
 solana-indexer-core = { path = "crates/core" }
 solana-indexer-cli = { path = "crates/cli" }
+solana-indexer-metrics-log = { path = "metrics/log" }
+solana-indexer-metrics-prometheus = { path = "metrics/prometheus" }
 solana-indexer-datasource-rpc-block-subscribe = { path = "datasource/rpc-block-subscribe" }
 solana-indexer-datasource-rpc-program-subscribe = { path = "datasource/rpc-program-subscribe" }
 solana-indexer-datasource-rpc-transaction-crawler = { path = "datasource/rpc-transaction-crawler" }

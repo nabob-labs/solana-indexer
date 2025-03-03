@@ -1,0 +1,20 @@
+[package]
+name = "solana-indexer-metrics-prometheus"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+solana-indexer-core = { workspace = true }
+
+async-trait = { workspace = true }
+log = { workspace = true }
+metrics = { workspace = true }
+metrics-exporter-prometheus = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+
+[lib]
+crate-type = ["rlib"]
