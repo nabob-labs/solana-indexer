@@ -3889,7 +3889,7 @@ dependencies = [
 [[package]]
 name = "solana-grpc-client"
 version = "2.1.13"
-source = "git+https://github.com/nabob-labs/solana-grpc.git?branch=stable#bcb9471e0687407493713561e7060826e2ded804"
+source = "git+https://github.com/nabob-labs/solana-grpc.git?branch=stable#329833303736e7a1eca45bf15a539571309ef504"
 dependencies = [
  "bytes",
  "futures",
@@ -3902,7 +3902,7 @@ dependencies = [
 [[package]]
 name = "solana-grpc-proto"
 version = "2.1.13"
-source = "git+https://github.com/nabob-labs/solana-grpc.git?branch=stable#bcb9471e0687407493713561e7060826e2ded804"
+source = "git+https://github.com/nabob-labs/solana-grpc.git?branch=stable#329833303736e7a1eca45bf15a539571309ef504"
 dependencies = [
  "anyhow",
  "bincode",
