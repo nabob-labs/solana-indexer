@@ -24,7 +24,7 @@ use solana_grpc_proto::{
 };
 
 #[derive(Debug)]
-pub struct YellowstoneGrpcGeyserClient {
+pub struct SolanaGrpcGeyserClient {
     pub endpoint: String,
     pub x_token: Option<String>,
     pub commitment: Option<CommitmentLevel>,
@@ -33,7 +33,7 @@ pub struct YellowstoneGrpcGeyserClient {
     pub account_deletions_tracked: Arc<RwLock<HashSet<Pubkey>>>,
 }
 
-impl YellowstoneGrpcGeyserClient {
+impl SolanaGrpcGeyserClient {
     pub fn new(
         endpoint: String,
         x_token: Option<String>,
@@ -42,7 +42,7 @@ impl YellowstoneGrpcGeyserClient {
         transaction_filters: HashMap<String, SubscribeRequestFilterTransactions>,
         account_deletions_tracked: Arc<RwLock<HashSet<Pubkey>>>,
     ) -> Self {
-        YellowstoneGrpcGeyserClient {
+        SolanaGrpcGeyserClient {
             endpoint,
             x_token,
             commitment,
@@ -54,7 +54,7 @@ impl YellowstoneGrpcGeyserClient {
 }
 
 #[async_trait]
-impl Datasource for YellowstoneGrpcGeyserClient {
+impl Datasource for SolanaGrpcGeyserClient {
     async fn consume(
         &self,
         sender: &UnboundedSender<Update>,
@@ -93,13 +93,12 @@ impl Datasource for YellowstoneGrpcGeyserClient {
                 commitment: commitment.map(|x| x as i32),
                 accounts_data_slice: vec![],
                 ping: None,
-                from_slot: None,
             };
 
             loop {
                 tokio::select! {
                     _ = cancellation_token.cancelled() => {
-                        log::info!("Cancelling Yellowstone gRPC subscription.");
+                        log::info!("Cancelling Solana gRPC subscription.");
                         break;
                     }
                     result = geyser_client.subscribe_with_request(Some(subscribe_request.clone())) => {
@@ -111,7 +110,7 @@ impl Datasource for YellowstoneGrpcGeyserClient {
                                             Some(UpdateOneof::Account(account_update)) => {
                                                 let start_time = std::time::Instant::now();
 
-                                                metrics.increment_counter("yellowstone_grpc_account_updates_received", 1).await.unwrap();
+                                                metrics.increment_counter("solana_grpc_account_updates_received", 1).await.unwrap();
 
 
                                                 if let Some(account_info) = account_update.account {
@@ -167,13 +166,13 @@ impl Datasource for YellowstoneGrpcGeyserClient {
 
                                                     metrics
                                                             .record_histogram(
-                                                                "yellowstone_grpc_account_process_time_nanoseconds",
+                                                                "solana_grpc_account_process_time_nanoseconds",
                                                                 start_time.elapsed().as_nanos() as f64
                                                             )
                                                             .await
                                                             .unwrap();
 
-                                                    metrics.increment_counter("yellowstone_grpc_account_updates_received", 1).await.unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
+                                                    metrics.increment_counter("solana_grpc_account_updates_received", 1).await.unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
 
                                                 } else {
                                                     log::error!("No account info in UpdateOneof::Account at slot {}", account_update.slot);
@@ -191,22 +190,22 @@ impl Datasource for YellowstoneGrpcGeyserClient {
                                                     else {
                                                         continue;
                                                     };
-                                                    let Some(yellowstone_transaction) =
+                                                    let Some(solana_transaction) =
                                                         transaction_info.transaction
                                                     else {
                                                         continue;
                                                     };
-                                                    let Some(yellowstone_tx_meta) = transaction_info.meta
+                                                    let Some(solana_tx_meta) = transaction_info.meta
                                                     else {
                                                         continue;
                                                     };
                                                     let Ok(versioned_transaction) =
-                                                        create_tx_versioned(yellowstone_transaction)
+                                                        create_tx_versioned(solana_transaction)
                                                     else {
                                                         continue;
                                                     };
                                                     let meta_original = match create_tx_meta(
-                                                        yellowstone_tx_meta,
+                                                        solana_tx_meta,
                                                     ) {
                                                         Ok(meta) => meta,
                                                         Err(err) => {
@@ -234,13 +233,13 @@ impl Datasource for YellowstoneGrpcGeyserClient {
 
                                                 metrics
                                                         .record_histogram(
-                                                            "yellowstone_grpc_transaction_process_time_nanoseconds",
+                                                            "solana_grpc_transaction_process_time_nanoseconds",
                                                             start_time.elapsed().as_nanos() as f64
                                                         )
                                                         .await
                                                         .unwrap();
 
-                                                metrics.increment_counter("yellowstone_grpc_transaction_updates_received", 1).await.unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
+                                                metrics.increment_counter("solana_grpc_transaction_updates_received", 1).await.unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
 
                                             }
 

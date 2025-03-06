@@ -30,7 +30,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "2.1.13"
+version = "2.0.18"
 authors = ["Bovey Maintainers <maintainers@solana.xyz>"]
 repository = "https://github.com/nabob-labs/solana-indexer"
 homepage = "https://solana.xyz/"
@@ -64,12 +64,15 @@ solana-indexer-decoding-raydium-amm-v4 = { path = "decoder/raydium-amm-v4" }
 solana-indexer-decoding-system-program = { path = "decoder/system-program" }
 solana-indexer-decoding-token-program = { path = "decoder/token-program" }
 
-solana-account = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
-solana-client = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
-solana-sdk = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
-solana-transaction-status = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
-spl-memo = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
-spl-token = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
+solana-account = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.18" }
+solana-client = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.18" }
+solana-sdk = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.18" }
+solana-transaction-status = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.18" }
+spl-memo = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.18" }
+spl-token = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.18" }
+
+solana-grpc-client = { git = "https://github.com/nabob-labs/solana-grpc.git", branch = "stable" }
+solana-grpc-proto = { git = "https://github.com/nabob-labs/solana-grpc.git", branch = "stable"}
 
 # other
 anyhow = "1.0.96"
@@ -108,8 +111,6 @@ tokio = { version = "1.43.0" }
 tokio-retry = "0.3.0"
 tokio-util = "0.7.13"
 unicode-xid = "0.2"
-solana-grpc-client = { git = "https://github.com/nabob-labs/solana-grpc.git", branch = "stable" }
-solana-grpc-proto = { git = "https://github.com/nabob-labs/solana-grpc.git", branch = "stable"}
 
 [patch.crates-io.curve25519-dalek]
 git = "https://github.com/anza-xyz/curve25519-dalek.git"
