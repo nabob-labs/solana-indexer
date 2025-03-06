@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -17,12 +16,12 @@ pub struct SetDefaultFeeRateInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for SetDefaultFeeRate {
     type ArrangedAccounts = SetDefaultFeeRateInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [whirlpools_config, fee_tier, fee_authority, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let whirlpools_config = accounts.get(0)?;
+        let fee_tier = accounts.get(1)?;
+        let fee_authority = accounts.get(2)?;
 
         Some(SetDefaultFeeRateInstructionAccounts {
             whirlpools_config: whirlpools_config.pubkey,

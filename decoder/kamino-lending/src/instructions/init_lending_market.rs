@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x22a2740e65895eef")]
-pub struct InitLendingMarket {
+pub struct InitLendingMarket{
     pub quote_currency: [u8; 32],
 }
 
@@ -19,14 +20,12 @@ pub struct InitLendingMarketInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitLendingMarket {
     type ArrangedAccounts = InitLendingMarketInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [lending_market_owner, lending_market, lending_market_authority, system_program, rent, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let lending_market_owner = accounts.get(0)?;
+        let lending_market = accounts.get(1)?;
+        let lending_market_authority = accounts.get(2)?;
+        let system_program = accounts.get(3)?;
+        let rent = accounts.get(4)?;
 
         Some(InitLendingMarketInstructionAccounts {
             lending_market_owner: lending_market_owner.pubkey,

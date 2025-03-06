@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0xf54b5b00ec611303")]
-pub struct SocializeLoss {
+pub struct SocializeLoss{
     pub liquidity_amount: u64,
 }
 
@@ -19,14 +20,12 @@ pub struct SocializeLossInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for SocializeLoss {
     type ArrangedAccounts = SocializeLossInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [risk_council, obligation, lending_market, reserve, instruction_sysvar_account, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let risk_council = accounts.get(0)?;
+        let obligation = accounts.get(1)?;
+        let lending_market = accounts.get(2)?;
+        let reserve = accounts.get(3)?;
+        let instruction_sysvar_account = accounts.get(4)?;
 
         Some(SocializeLossInstructionAccounts {
             risk_council: risk_council.pubkey,

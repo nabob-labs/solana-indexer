@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x37")]
-pub struct Print {
+pub struct Print{
     pub print_args: PrintArgs,
 }
 
@@ -35,14 +34,25 @@ pub struct PrintInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Print {
     type ArrangedAccounts = PrintInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [edition_metadata, edition, edition_mint, edition_token_account_owner, edition_token_account, edition_mint_authority, edition_token_record, master_edition, edition_marker_pda, payer, master_token_account_owner, master_token_account, master_metadata, update_authority, spl_token_program, spl_ata_program, sysvar_instructions, system_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let edition_metadata = accounts.get(0)?;
+        let edition = accounts.get(1)?;
+        let edition_mint = accounts.get(2)?;
+        let edition_token_account_owner = accounts.get(3)?;
+        let edition_token_account = accounts.get(4)?;
+        let edition_mint_authority = accounts.get(5)?;
+        let edition_token_record = accounts.get(6)?;
+        let master_edition = accounts.get(7)?;
+        let edition_marker_pda = accounts.get(8)?;
+        let payer = accounts.get(9)?;
+        let master_token_account_owner = accounts.get(10)?;
+        let master_token_account = accounts.get(11)?;
+        let master_metadata = accounts.get(12)?;
+        let update_authority = accounts.get(13)?;
+        let spl_token_program = accounts.get(14)?;
+        let spl_ata_program = accounts.get(15)?;
+        let sysvar_instructions = accounts.get(16)?;
+        let system_program = accounts.get(17)?;
 
         Some(PrintInstructionAccounts {
             edition_metadata: edition_metadata.pubkey,

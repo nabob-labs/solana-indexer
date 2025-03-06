@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -21,14 +20,18 @@ pub struct CancelOrderInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CancelOrder {
     type ArrangedAccounts = CancelOrderInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [signer, maker, order, input_mint_reserve, maker_input_mint_account, input_mint, input_token_program, event_authority, program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let signer = accounts.get(0)?;
+        let maker = accounts.get(1)?;
+        let order = accounts.get(2)?;
+        let input_mint_reserve = accounts.get(3)?;
+        let maker_input_mint_account = accounts.get(4)?;
+        let input_mint = accounts.get(5)?;
+        let input_token_program = accounts.get(6)?;
+        let event_authority = accounts.get(7)?;
+        let program = accounts.get(8)?;
 
         Some(CancelOrderInstructionAccounts {
             signer: signer.pubkey,

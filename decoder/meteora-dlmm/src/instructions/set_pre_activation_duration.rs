@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -16,12 +15,11 @@ pub struct SetPreActivationDurationInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for SetPreActivationDuration {
     type ArrangedAccounts = SetPreActivationDurationInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [lb_pair, creator, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let lb_pair = accounts.get(0)?;
+        let creator = accounts.get(1)?;
 
         Some(SetPreActivationDurationInstructionAccounts {
             lb_pair: lb_pair.pubkey,

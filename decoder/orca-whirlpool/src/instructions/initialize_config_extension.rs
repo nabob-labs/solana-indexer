@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -17,14 +16,14 @@ pub struct InitializeConfigExtensionInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializeConfigExtension {
     type ArrangedAccounts = InitializeConfigExtensionInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [config, config_extension, funder, fee_authority, system_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let config = accounts.get(0)?;
+        let config_extension = accounts.get(1)?;
+        let funder = accounts.get(2)?;
+        let fee_authority = accounts.get(3)?;
+        let system_program = accounts.get(4)?;
 
         Some(InitializeConfigExtensionInstructionAccounts {
             config: config.pubkey,

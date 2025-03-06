@@ -23,13 +23,14 @@ pub struct SetParamsInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for SetParams {
     type ArrangedAccounts = SetParamsInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [global, user, system_program, event_authority, program, _remaining @ ..] = accounts
-        else {
-            return None;
-        };
+        let global = accounts.get(0)?;
+        let user = accounts.get(1)?;
+        let system_program = accounts.get(2)?;
+        let event_authority = accounts.get(3)?;
+        let program = accounts.get(4)?;
 
         Some(SetParamsInstructionAccounts {
             global: global.pubkey,

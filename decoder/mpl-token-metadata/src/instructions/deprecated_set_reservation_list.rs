@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x05")]
-pub struct DeprecatedSetReservationList {}
+pub struct DeprecatedSetReservationList{
+}
 
 pub struct DeprecatedSetReservationListInstructionAccounts {
     pub master_edition: solana_sdk::pubkey::Pubkey,
@@ -15,12 +17,10 @@ pub struct DeprecatedSetReservationListInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for DeprecatedSetReservationList {
     type ArrangedAccounts = DeprecatedSetReservationListInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [master_edition, reservation_list, resource, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let master_edition = accounts.get(0)?;
+        let reservation_list = accounts.get(1)?;
+        let resource = accounts.get(2)?;
 
         Some(DeprecatedSetReservationListInstructionAccounts {
             master_edition: master_edition.pubkey,

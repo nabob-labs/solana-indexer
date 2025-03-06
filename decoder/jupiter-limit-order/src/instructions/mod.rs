@@ -1,5 +1,3 @@
-use crate::PROGRAM_ID;
-
 use super::JupiterLimitOrderDecoder;
 pub mod cancel_expired_order;
 pub mod cancel_order;
@@ -39,17 +37,13 @@ pub enum JupiterLimitOrderInstruction {
     CreateOrderEvent(create_order_event::CreateOrderEvent),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for JupiterLimitOrderDecoder {
+impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for JupiterLimitOrderDecoder {
     type InstructionType = JupiterLimitOrderInstruction;
 
     fn decode_instruction(
         &self,
         instruction: &solana_sdk::instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
-        if !instruction.program_id.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         solana_indexer_core::try_decode_instructions!(instruction,
             JupiterLimitOrderInstruction::InitializeOrder => initialize_order::InitializeOrder,
             JupiterLimitOrderInstruction::FillOrder => fill_order::FillOrder,

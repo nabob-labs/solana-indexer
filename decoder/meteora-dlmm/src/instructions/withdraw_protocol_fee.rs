@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -24,14 +23,18 @@ pub struct WithdrawProtocolFeeInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for WithdrawProtocolFee {
     type ArrangedAccounts = WithdrawProtocolFeeInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [lb_pair, reserve_x, reserve_y, token_x_mint, token_y_mint, receiver_token_x, receiver_token_y, token_x_program, token_y_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let lb_pair = accounts.get(0)?;
+        let reserve_x = accounts.get(1)?;
+        let reserve_y = accounts.get(2)?;
+        let token_x_mint = accounts.get(3)?;
+        let token_y_mint = accounts.get(4)?;
+        let receiver_token_x = accounts.get(5)?;
+        let receiver_token_y = accounts.get(6)?;
+        let token_x_program = accounts.get(7)?;
+        let token_y_program = accounts.get(8)?;
 
         Some(WithdrawProtocolFeeInstructionAccounts {
             lb_pair: lb_pair.pubkey,

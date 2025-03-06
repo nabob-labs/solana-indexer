@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x75a9b045c5170fa2")]
-pub struct InitUserMetadata {
+pub struct InitUserMetadata{
     pub user_lookup_table: solana_sdk::pubkey::Pubkey,
 }
 
@@ -20,14 +21,13 @@ pub struct InitUserMetadataInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitUserMetadata {
     type ArrangedAccounts = InitUserMetadataInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [owner, fee_payer, user_metadata, referrer_user_metadata, rent, system_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let owner = accounts.get(0)?;
+        let fee_payer = accounts.get(1)?;
+        let user_metadata = accounts.get(2)?;
+        let referrer_user_metadata = accounts.get(3)?;
+        let rent = accounts.get(4)?;
+        let system_program = accounts.get(5)?;
 
         Some(InitUserMetadataInstructionAccounts {
             owner: owner.pubkey,

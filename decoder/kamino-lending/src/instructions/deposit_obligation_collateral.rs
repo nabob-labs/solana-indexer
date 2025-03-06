@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x6cd1044815167685")]
-pub struct DepositObligationCollateral {
+pub struct DepositObligationCollateral{
     pub collateral_amount: u64,
 }
 
@@ -22,14 +23,15 @@ pub struct DepositObligationCollateralInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for DepositObligationCollateral {
     type ArrangedAccounts = DepositObligationCollateralInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [owner, obligation, lending_market, deposit_reserve, reserve_destination_collateral, user_source_collateral, token_program, instruction_sysvar_account, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let owner = accounts.get(0)?;
+        let obligation = accounts.get(1)?;
+        let lending_market = accounts.get(2)?;
+        let deposit_reserve = accounts.get(3)?;
+        let reserve_destination_collateral = accounts.get(4)?;
+        let user_source_collateral = accounts.get(5)?;
+        let token_program = accounts.get(6)?;
+        let instruction_sysvar_account = accounts.get(7)?;
 
         Some(DepositObligationCollateralInstructionAccounts {
             owner: owner.pubkey,

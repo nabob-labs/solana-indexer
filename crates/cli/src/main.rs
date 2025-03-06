@@ -1,8 +1,5 @@
-use {
-    anyhow::Context,
-    clap::Parser,
-    commands::{Cli, Commands, IdlSource, IdlStandard},
-};
+use clap::Parser;
+use commands::{Cli, Commands};
 
 pub mod accounts;
 pub mod commands;
@@ -20,32 +17,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Parse(options) => match options.idl {
-            IdlSource::FilePath(path) => match options.standard {
-                IdlStandard::Codama => {
-                    handlers::parse_codama(
-                        path,
-                        options.output,
-                        options.as_crate,
-                        options.event_hints,
-                    )?;
-                }
-                IdlStandard::Anchor => {
-                    if options.event_hints.is_some() {
-                        anyhow::bail!("The '--event-hints' option can only be used with --codama.");
-                    }
-                    handlers::parse(path, options.output, options.as_crate)?;
-                }
-            },
-            IdlSource::ProgramAddress(program_address) => {
-                let url = options
-                    .url
-                    .as_ref()
-                    .context("Network URL (--url / -u) argument is required when parsing an IDL from a program address.")?;
-
-                handlers::process_pda_idl(program_address, url, options.output, options.as_crate)?;
-            }
-        },
+        Commands::Parse(options) => handlers::parse(options)?,
     };
 
     Ok(())

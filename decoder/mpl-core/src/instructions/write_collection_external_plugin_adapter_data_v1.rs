@@ -1,15 +1,13 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x1d")]
-pub struct WriteCollectionExternalPluginAdapterDataV1 {
-    pub write_collection_external_plugin_adapter_data_v1_args:
-        WriteCollectionExternalPluginAdapterDataV1Args,
+pub struct WriteCollectionExternalPluginAdapterDataV1{
+    pub write_collection_external_plugin_adapter_data_v1_args: WriteCollectionExternalPluginAdapterDataV1Args,
 }
 
 pub struct WriteCollectionExternalPluginAdapterDataV1InstructionAccounts {
@@ -24,24 +22,21 @@ pub struct WriteCollectionExternalPluginAdapterDataV1InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for WriteCollectionExternalPluginAdapterDataV1 {
     type ArrangedAccounts = WriteCollectionExternalPluginAdapterDataV1InstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [collection, payer, authority, buffer, system_program, log_wrapper, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let collection = accounts.get(0)?;
+        let payer = accounts.get(1)?;
+        let authority = accounts.get(2)?;
+        let buffer = accounts.get(3)?;
+        let system_program = accounts.get(4)?;
+        let log_wrapper = accounts.get(5)?;
 
-        Some(
-            WriteCollectionExternalPluginAdapterDataV1InstructionAccounts {
-                collection: collection.pubkey,
-                payer: payer.pubkey,
-                authority: authority.pubkey,
-                buffer: buffer.pubkey,
-                system_program: system_program.pubkey,
-                log_wrapper: log_wrapper.pubkey,
-            },
-        )
+        Some(WriteCollectionExternalPluginAdapterDataV1InstructionAccounts {
+            collection: collection.pubkey,
+            payer: payer.pubkey,
+            authority: authority.pubkey,
+            buffer: buffer.pubkey,
+            system_program: system_program.pubkey,
+            log_wrapper: log_wrapper.pubkey,
+        })
     }
 }

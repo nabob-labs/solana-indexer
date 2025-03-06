@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x17")]
-pub struct AddCollectionExternalPluginAdapterV1 {
+pub struct AddCollectionExternalPluginAdapterV1{
     pub add_collection_external_plugin_adapter_v1_args: AddCollectionExternalPluginAdapterV1Args,
 }
 
@@ -22,13 +21,12 @@ pub struct AddCollectionExternalPluginAdapterV1InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for AddCollectionExternalPluginAdapterV1 {
     type ArrangedAccounts = AddCollectionExternalPluginAdapterV1InstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [collection, payer, authority, system_program, log_wrapper, _remaining @ ..] = accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let collection = accounts.get(0)?;
+        let payer = accounts.get(1)?;
+        let authority = accounts.get(2)?;
+        let system_program = accounts.get(3)?;
+        let log_wrapper = accounts.get(4)?;
 
         Some(AddCollectionExternalPluginAdapterV1InstructionAccounts {
             collection: collection.pubkey,

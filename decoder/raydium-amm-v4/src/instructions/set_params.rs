@@ -1,9 +1,6 @@
-use {
-    super::super::types::*,
-    crate::accounts::fees::Fees,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
-
+use super::super::types::*;
+use crate::accounts::fees::Fees;
+use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -40,14 +37,25 @@ pub struct SetParamsInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for SetParams {
     type ArrangedAccounts = SetParamsInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [token_program, amm, amm_authority, amm_open_orders, amm_target_orders, amm_coin_vault, amm_pc_vault, serum_program, serum_market, serum_coin_vault, serum_pc_vault, serum_vault_signer, serum_event_queue, serum_bids, serum_asks, amm_admin_account, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let token_program = accounts.get(0)?;
+        let amm = accounts.get(1)?;
+        let amm_authority = accounts.get(2)?;
+        let amm_open_orders = accounts.get(3)?;
+        let amm_target_orders = accounts.get(4)?;
+        let amm_coin_vault = accounts.get(5)?;
+        let amm_pc_vault = accounts.get(6)?;
+        let serum_program = accounts.get(7)?;
+        let serum_market = accounts.get(8)?;
+        let serum_coin_vault = accounts.get(9)?;
+        let serum_pc_vault = accounts.get(10)?;
+        let serum_vault_signer = accounts.get(11)?;
+        let serum_event_queue = accounts.get(12)?;
+        let serum_bids = accounts.get(13)?;
+        let serum_asks = accounts.get(14)?;
+        let amm_admin_account = accounts.get(15)?;
         let new_amm_open_orders_account = accounts.get(16);
 
         Some(SetParamsInstructionAccounts {

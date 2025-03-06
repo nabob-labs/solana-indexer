@@ -1,24 +1,19 @@
-use {
-    async_trait::async_trait,
-    solana_indexer_core::{
-        datasource::{Datasource, TransactionUpdate, Update, UpdateType},
-        error::IndexerResult,
-        metrics::MetricsCollection,
-        transformers::transaction_metadata_from_original_meta,
-    },
-    futures::StreamExt,
-    solana_client::{
-        nonblocking::pubsub_client::PubsubClient,
-        rpc_client::SerializableTransaction,
-        rpc_config::{RpcBlockSubscribeConfig, RpcBlockSubscribeFilter},
-    },
-    std::{sync::Arc, time::Duration},
-    tokio::sync::mpsc::UnboundedSender,
-    tokio_util::sync::CancellationToken,
+use async_trait::async_trait;
+use solana_indexer_core::{
+    datasource::{Datasource, TransactionUpdate, Update, UpdateType},
+    error::IndexerResult,
+    metrics::MetricsCollection,
+    transformers::transaction_metadata_from_original_meta,
 };
-
-const MAX_RECONNECTION_ATTEMPTS: u32 = 10;
-const RECONNECTION_DELAY_MS: u64 = 3000;
+use futures::StreamExt;
+use solana_client::{
+    nonblocking::pubsub_client::PubsubClient,
+    rpc_client::SerializableTransaction,
+    rpc_config::{RpcBlockSubscribeConfig, RpcBlockSubscribeFilter},
+};
+use std::sync::Arc;
+use tokio::sync::mpsc::UnboundedSender;
+use tokio_util::sync::CancellationToken;
 
 #[derive(Debug, Clone)]
 pub struct Filters {
@@ -60,62 +55,36 @@ impl Datasource for RpcBlockSubscribe {
         cancellation_token: CancellationToken,
         metrics: Arc<MetricsCollection>,
     ) -> IndexerResult<()> {
-        let mut reconnection_attempts = 0;
+        let client = PubsubClient::new(&self.rpc_ws_url).await.map_err(|err| {
+            solana_indexer_core::error::Error::Custom(format!(
+                "Failed to create an RPC subscribe client: {err}"
+            ))
+        })?;
 
-        loop {
-            if cancellation_token.is_cancelled() {
-                log::info!("Cancellation requested, stopping reconnection attempts");
-                break;
-            }
+        let filters = self.filters.clone();
+        let sender = sender.clone();
 
-            let client = match PubsubClient::new(&self.rpc_ws_url).await {
-                Ok(client) => client,
-                Err(err) => {
-                    log::error!("Failed to create RPC subscribe client: {}", err);
-                    reconnection_attempts += 1;
-                    if reconnection_attempts >= MAX_RECONNECTION_ATTEMPTS {
-                        return Err(solana_indexer_core::error::Error::Custom(format!(
-                            "Failed to create RPC subscribe client after {} attempts: {}",
-                            MAX_RECONNECTION_ATTEMPTS, err
-                        )));
-                    }
-                    tokio::time::sleep(Duration::from_millis(RECONNECTION_DELAY_MS)).await;
-                    continue;
-                }
-            };
-
-            let filters = self.filters.clone();
+        tokio::spawn(async move {
             let sender_clone = sender.clone();
-
-            let (mut block_stream, _block_unsub) = match client
+            let (mut stream, _unsub) = match client
                 .block_subscribe(filters.block_filter, filters.block_subscribe_config)
                 .await
             {
                 Ok(subscription) => subscription,
                 Err(err) => {
-                    log::error!("Failed to subscribe to block updates: {:?}", err);
-                    reconnection_attempts += 1;
-                    if reconnection_attempts > MAX_RECONNECTION_ATTEMPTS {
-                        return Err(solana_indexer_core::error::Error::Custom(format!(
-                            "Failed to subscribe after {} attempts: {}",
-                            MAX_RECONNECTION_ATTEMPTS, err
-                        )));
-                    }
-                    tokio::time::sleep(Duration::from_millis(RECONNECTION_DELAY_MS)).await;
-                    continue;
+                    log::error!("Failed to subscribe to blocks updates: {:?}", err);
+                    return;
                 }
             };
-
-            reconnection_attempts = 0;
 
             loop {
                 tokio::select! {
                     _ = cancellation_token.cancelled() => {
-                        log::info!("Cancellation requested, stopping subscription...");
-                        return Ok(());
+                        log::info!("Cancelling RPC blocks subscription...");
+                        break;
                     }
-                    block_event = block_stream.next() => {
-                        match block_event {
+                    event_result = stream.next() => {
+                        match event_result {
                             Some(tx_event) => {
                                 let slot = tx_event.context.slot;
 
@@ -145,26 +114,24 @@ impl Datasource for RpcBlockSubscribe {
                                                 continue;
                                             };
 
-                                            let update = Update::Transaction(Box::new(TransactionUpdate {
-                                                signature: *decoded_transaction.get_signature(),
+                                            let update = Update::Transaction(TransactionUpdate {
+                                                signature: decoded_transaction.get_signature().clone(),
                                                 transaction: decoded_transaction.clone(),
                                                 meta: meta_needed,
                                                 is_vote: false,
                                                 slot,
-                                                block_time: block.block_time,
-                                            }));
+                                            });
 
                                             metrics
-                                                .record_histogram(
-                                                    "block_subscribe_transaction_process_time_nanoseconds",
-                                                    start_time.elapsed().as_nanos() as f64
-                                                )
-                                                .await
-                                                .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
+                                                    .record_histogram(
+                                                        "block_subscribe_transaction_process_time_nanoseconds",
+                                                        start_time.elapsed().as_nanos() as f64
+                                                    )
+                                                    .await
+                                                    .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
 
-                                            metrics.increment_counter("block_subscribe_transactions_processed", 1)
-                                                .await
-                                                .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
+                                            metrics.increment_counter("block_subscribe_transactions_processed", 1).await.unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
+
 
                                             if let Err(err) = sender_clone.send(update) {
                                                 log::error!("Error sending transaction update: {:?}", err);
@@ -174,29 +141,25 @@ impl Datasource for RpcBlockSubscribe {
                                     }
 
                                     metrics
-                                        .record_histogram(
-                                            "block_subscribe_block_process_time_nanoseconds",
-                                            block_start_time.elapsed().as_nanos() as f64
-                                        )
-                                        .await
-                                        .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
+                                            .record_histogram(
+                                                "block_subscribe_block_process_time_nanoseconds",
+                                                block_start_time.elapsed().as_nanos() as f64
+                                            )
+                                            .await
+                                            .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
 
-                                    metrics.increment_counter("block_subscribe_blocks_received", 1)
-                                        .await
-                                        .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
+                                    metrics.increment_counter("block_subscribe_blocks_received", 1).await.unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
                                 }
                             }
                             None => {
-                                log::warn!("Block stream has been closed, attempting to reconnect...");
+                                log::info!("Blocks stream has been closed");
                                 break;
                             }
                         }
                     }
                 }
             }
-
-            tokio::time::sleep(Duration::from_millis(RECONNECTION_DELAY_MS)).await;
-        }
+        });
 
         Ok(())
     }

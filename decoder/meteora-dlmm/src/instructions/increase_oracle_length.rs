@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -19,13 +18,14 @@ pub struct IncreaseOracleLengthInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for IncreaseOracleLength {
     type ArrangedAccounts = IncreaseOracleLengthInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [oracle, funder, system_program, event_authority, program, _remaining @ ..] = accounts
-        else {
-            return None;
-        };
+        let oracle = accounts.get(0)?;
+        let funder = accounts.get(1)?;
+        let system_program = accounts.get(2)?;
+        let event_authority = accounts.get(3)?;
+        let program = accounts.get(4)?;
 
         Some(IncreaseOracleLengthInstructionAccounts {
             oracle: oracle.pubkey,

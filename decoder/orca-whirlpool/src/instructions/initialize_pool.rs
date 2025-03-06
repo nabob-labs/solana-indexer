@@ -1,13 +1,11 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use solana_indexer_core::{borsh, IndexerDeserialize};
+use super::super::types::*;
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x5fb40aac54aee828")]
-pub struct InitializePool {
+pub struct InitializePool{
     pub bumps: WhirlpoolBumps,
     pub tick_spacing: u16,
     pub initial_sqrt_price: u128,
@@ -30,14 +28,18 @@ pub struct InitializePoolInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializePool {
     type ArrangedAccounts = InitializePoolInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [whirlpools_config, token_mint_a, token_mint_b, funder, whirlpool, token_vault_a, token_vault_b, fee_tier, token_program, system_program, rent, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let whirlpools_config = accounts.get(0)?;
+        let token_mint_a = accounts.get(1)?;
+        let token_mint_b = accounts.get(2)?;
+        let funder = accounts.get(3)?;
+        let whirlpool = accounts.get(4)?;
+        let token_vault_a = accounts.get(5)?;
+        let token_vault_b = accounts.get(6)?;
+        let fee_tier = accounts.get(7)?;
+        let token_program = accounts.get(8)?;
+        let system_program = accounts.get(9)?;
+        let rent = accounts.get(10)?;
 
         Some(InitializePoolInstructionAccounts {
             whirlpools_config: whirlpools_config.pubkey,

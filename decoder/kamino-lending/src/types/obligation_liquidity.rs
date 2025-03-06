@@ -1,11 +1,10 @@
-use {
-    super::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 pub struct ObligationLiquidity {
     pub borrow_reserve: solana_sdk::pubkey::Pubkey,
     pub cumulative_borrow_rate_bsf: BigFractionBytes,

@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0xb1c878866ed99351")]
-pub struct GiveUpPendingFees {
+pub struct GiveUpPendingFees{
     pub max_amount_to_give_up: u64,
 }
 
@@ -17,12 +18,10 @@ pub struct GiveUpPendingFeesInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for GiveUpPendingFees {
     type ArrangedAccounts = GiveUpPendingFeesInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [admin_authority, vault_state, klend_program, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let admin_authority = accounts.get(0)?;
+        let vault_state = accounts.get(1)?;
+        let klend_program = accounts.get(2)?;
 
         Some(GiveUpPendingFeesInstructionAccounts {
             admin_authority: admin_authority.pubkey,

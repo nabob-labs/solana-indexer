@@ -14,10 +14,10 @@ pub struct AmountToUiAmountAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for AmountToUiAmount {
     type ArrangedAccounts = AmountToUiAmountAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let mint = accounts.first()?;
+        let mint = accounts.get(0)?;
 
         Some(AmountToUiAmountAccounts { mint: mint.pubkey })
     }

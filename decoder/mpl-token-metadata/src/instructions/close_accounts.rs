@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x39")]
-pub struct CloseAccounts {}
+pub struct CloseAccounts{
+}
 
 pub struct CloseAccountsInstructionAccounts {
     pub metadata: solana_sdk::pubkey::Pubkey,
@@ -17,12 +19,12 @@ pub struct CloseAccountsInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CloseAccounts {
     type ArrangedAccounts = CloseAccountsInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [metadata, edition, mint, authority, destination, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let metadata = accounts.get(0)?;
+        let edition = accounts.get(1)?;
+        let mint = accounts.get(2)?;
+        let authority = accounts.get(3)?;
+        let destination = accounts.get(4)?;
 
         Some(CloseAccountsInstructionAccounts {
             metadata: metadata.pubkey,

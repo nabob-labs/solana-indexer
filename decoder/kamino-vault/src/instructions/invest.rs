@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x0df5b467feb67904")]
-pub struct Invest {}
+pub struct Invest{
+}
 
 pub struct InvestInstructionAccounts {
     pub payer: solana_sdk::pubkey::Pubkey,
@@ -28,14 +30,23 @@ pub struct InvestInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Invest {
     type ArrangedAccounts = InvestInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [payer, payer_token_account, vault_state, token_vault, token_mint, base_vault_authority, ctoken_vault, reserve, lending_market, lending_market_authority, reserve_liquidity_supply, reserve_collateral_mint, klend_program, reserve_collateral_token_program, token_program, instruction_sysvar_account, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let payer = accounts.get(0)?;
+        let payer_token_account = accounts.get(1)?;
+        let vault_state = accounts.get(2)?;
+        let token_vault = accounts.get(3)?;
+        let token_mint = accounts.get(4)?;
+        let base_vault_authority = accounts.get(5)?;
+        let ctoken_vault = accounts.get(6)?;
+        let reserve = accounts.get(7)?;
+        let lending_market = accounts.get(8)?;
+        let lending_market_authority = accounts.get(9)?;
+        let reserve_liquidity_supply = accounts.get(10)?;
+        let reserve_collateral_mint = accounts.get(11)?;
+        let klend_program = accounts.get(12)?;
+        let reserve_collateral_token_program = accounts.get(13)?;
+        let token_program = accounts.get(14)?;
+        let instruction_sysvar_account = accounts.get(15)?;
 
         Some(InvestInstructionAccounts {
             payer: payer.pubkey,

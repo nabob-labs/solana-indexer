@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0xea75b57db98edc1d")]
-pub struct RedeemReserveCollateral {
+pub struct RedeemReserveCollateral{
     pub collateral_amount: u64,
 }
 
@@ -26,14 +27,19 @@ pub struct RedeemReserveCollateralInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for RedeemReserveCollateral {
     type ArrangedAccounts = RedeemReserveCollateralInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [owner, lending_market, reserve, lending_market_authority, reserve_liquidity_mint, reserve_collateral_mint, reserve_liquidity_supply, user_source_collateral, user_destination_liquidity, collateral_token_program, liquidity_token_program, instruction_sysvar_account, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let owner = accounts.get(0)?;
+        let lending_market = accounts.get(1)?;
+        let reserve = accounts.get(2)?;
+        let lending_market_authority = accounts.get(3)?;
+        let reserve_liquidity_mint = accounts.get(4)?;
+        let reserve_collateral_mint = accounts.get(5)?;
+        let reserve_liquidity_supply = accounts.get(6)?;
+        let user_source_collateral = accounts.get(7)?;
+        let user_destination_liquidity = accounts.get(8)?;
+        let collateral_token_program = accounts.get(9)?;
+        let liquidity_token_program = accounts.get(10)?;
+        let instruction_sysvar_account = accounts.get(11)?;
 
         Some(RedeemReserveCollateralInstructionAccounts {
             owner: owner.pubkey,

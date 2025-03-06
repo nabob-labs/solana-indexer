@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x27")]
-pub struct CloseEscrowAccount {}
+pub struct CloseEscrowAccount{
+}
 
 pub struct CloseEscrowAccountInstructionAccounts {
     pub escrow: solana_sdk::pubkey::Pubkey,
@@ -20,14 +22,15 @@ pub struct CloseEscrowAccountInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CloseEscrowAccount {
     type ArrangedAccounts = CloseEscrowAccountInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [escrow, metadata, mint, token_account, edition, payer, system_program, sysvar_instructions, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let escrow = accounts.get(0)?;
+        let metadata = accounts.get(1)?;
+        let mint = accounts.get(2)?;
+        let token_account = accounts.get(3)?;
+        let edition = accounts.get(4)?;
+        let payer = accounts.get(5)?;
+        let system_program = accounts.get(6)?;
+        let sysvar_instructions = accounts.get(7)?;
 
         Some(CloseEscrowAccountInstructionAccounts {
             escrow: escrow.pubkey,

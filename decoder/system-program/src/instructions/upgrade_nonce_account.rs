@@ -12,10 +12,10 @@ pub struct UpgradeNonceAccountAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for UpgradeNonceAccount {
     type ArrangedAccounts = UpgradeNonceAccountAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let nonce_account = accounts.first()?;
+        let nonce_account = accounts.get(0)?;
 
         Some(UpgradeNonceAccountAccounts {
             nonce_account: nonce_account.pubkey,

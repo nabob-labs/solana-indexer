@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x29")]
-pub struct Burn {
+pub struct Burn{
     pub burn_args: BurnArgs,
 }
 
@@ -31,14 +30,21 @@ pub struct BurnInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Burn {
     type ArrangedAccounts = BurnInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [authority, collection_metadata, metadata, edition, mint, token, master_edition, master_edition_mint, master_edition_token, edition_marker, token_record, system_program, sysvar_instructions, spl_token_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let authority = accounts.get(0)?;
+        let collection_metadata = accounts.get(1)?;
+        let metadata = accounts.get(2)?;
+        let edition = accounts.get(3)?;
+        let mint = accounts.get(4)?;
+        let token = accounts.get(5)?;
+        let master_edition = accounts.get(6)?;
+        let master_edition_mint = accounts.get(7)?;
+        let master_edition_token = accounts.get(8)?;
+        let edition_marker = accounts.get(9)?;
+        let token_record = accounts.get(10)?;
+        let system_program = accounts.get(11)?;
+        let sysvar_instructions = accounts.get(12)?;
+        let spl_token_program = accounts.get(13)?;
 
         Some(BurnInstructionAccounts {
             authority: authority.pubkey,

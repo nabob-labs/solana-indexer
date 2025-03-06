@@ -1,32 +1,26 @@
-//! Defines the `Error` enum and `IndexerResult` type used for error handling in
-//! the `indexer-core` framework.
+//! Defines the `Error` enum and `IndexerResult` type used for error handling in the `indexer-core` framework.
 //!
-//! The `Error` enum captures various error types that can occur within the
-//! framework, providing detailed error messages and support for custom error
-//! handling. The `IndexerResult` type alias simplifies function signatures by
-//! unifying the return type for functions that may return an `Error`.
+//! The `Error` enum captures various error types that can occur within the framework, providing detailed
+//! error messages and support for custom error handling. The `IndexerResult` type alias simplifies
+//! function signatures by unifying the return type for functions that may return an `Error`.
 //!
 //! # Overview
 //!
-//! - **`Error`**: An enum representing specific error cases, from missing data
-//!   in transactions to issues with data sources. Each variant provides a
-//!   descriptive error message.
-//! - **`IndexerResult`**: A type alias for `Result<T, Error>`, where `T` is the
-//!   successful return type.
+//! - **`Error`**: An enum representing specific error cases, from missing data in transactions to
+//!   issues with data sources. Each variant provides a descriptive error message.
+//! - **`IndexerResult`**: A type alias for `Result<T, Error>`, where `T` is the successful return type.
 //!
-//! These errors are essential for handling various scenarios that may arise
-//! during data processing in the `indexer-core` pipeline, including missing
-//! update types, missing transaction components, and custom errors for more
-//! flexible error management.
+//! These errors are essential for handling various scenarios that may arise during data processing
+//! in the `indexer-core` pipeline, including missing update types, missing transaction components,
+//! and custom errors for more flexible error management.
 //!
 //! # Notes
 //!
-//! - Implementing `thiserror::Error` provides automatic derivation of error
-//!   display messages.
-//! - Each error variant corresponds to a unique error scenario within the
-//!   `indexer-core` framework.
+//! - Implementing `thiserror::Error` provides automatic derivation of error display messages.
+//! - Each error variant corresponds to a unique error scenario within the `indexer-core` framework.
 
-use {crate::datasource::UpdateType, thiserror::Error};
+use crate::datasource::UpdateType;
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -51,9 +45,8 @@ pub enum Error {
 /// A type alias for `Result` with the `Error` type as the error variant.
 ///
 /// This alias simplifies function signatures in the `indexer-core` framework by
-/// unifying error handling under a common type. Any function that may result in
-/// an `Error` can return a `IndexerResult`, providing clear and consistent error
-/// reporting.
+/// unifying error handling under a common type. Any function that may result in an
+/// `Error` can return a `IndexerResult`, providing clear and consistent error reporting.
 ///
 /// # Example
 ///

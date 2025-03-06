@@ -1,13 +1,11 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use solana_indexer_core::{borsh, IndexerDeserialize};
+use super::super::types::*;
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0xfc681286a44e128c")]
-pub struct FlashFillOrder {
+pub struct FlashFillOrder{
     pub params: FlashFillOrderParams,
 }
 
@@ -30,14 +28,20 @@ pub struct FlashFillOrderInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for FlashFillOrder {
     type ArrangedAccounts = FlashFillOrderInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [taker, maker, order, input_mint_reserve, maker_output_mint_account, taker_output_mint_account, fee_account, input_token_program, output_mint, output_token_program, system_program, event_authority, program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let taker = accounts.get(0)?;
+        let maker = accounts.get(1)?;
+        let order = accounts.get(2)?;
+        let input_mint_reserve = accounts.get(3)?;
+        let maker_output_mint_account = accounts.get(4)?;
+        let taker_output_mint_account = accounts.get(5)?;
+        let fee_account = accounts.get(6)?;
+        let input_token_program = accounts.get(7)?;
+        let output_mint = accounts.get(8)?;
+        let output_token_program = accounts.get(9)?;
+        let system_program = accounts.get(10)?;
+        let event_authority = accounts.get(11)?;
+        let program = accounts.get(12)?;
 
         Some(FlashFillOrderInstructionAccounts {
             taker: taker.pubkey,

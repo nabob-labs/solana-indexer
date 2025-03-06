@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -18,14 +17,15 @@ pub struct ClosePositionInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for ClosePosition {
     type ArrangedAccounts = ClosePositionInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [position_authority, receiver, position, position_mint, position_token_account, token_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let position_authority = accounts.get(0)?;
+        let receiver = accounts.get(1)?;
+        let position = accounts.get(2)?;
+        let position_mint = accounts.get(3)?;
+        let position_token_account = accounts.get(4)?;
+        let token_program = accounts.get(5)?;
 
         Some(ClosePositionInstructionAccounts {
             position_authority: position_authority.pubkey,

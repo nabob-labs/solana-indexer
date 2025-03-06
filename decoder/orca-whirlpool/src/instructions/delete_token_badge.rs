@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -18,14 +17,15 @@ pub struct DeleteTokenBadgeInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for DeleteTokenBadge {
     type ArrangedAccounts = DeleteTokenBadgeInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [whirlpools_config, whirlpools_config_extension, token_badge_authority, token_mint, token_badge, receiver, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let whirlpools_config = accounts.get(0)?;
+        let whirlpools_config_extension = accounts.get(1)?;
+        let token_badge_authority = accounts.get(2)?;
+        let token_mint = accounts.get(3)?;
+        let token_badge = accounts.get(4)?;
+        let receiver = accounts.get(5)?;
 
         Some(DeleteTokenBadgeInstructionAccounts {
             whirlpools_config: whirlpools_config.pubkey,

@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x1c")]
-pub struct RemoveCreatorVerification {}
+pub struct RemoveCreatorVerification{
+}
 
 pub struct RemoveCreatorVerificationInstructionAccounts {
     pub metadata: solana_sdk::pubkey::Pubkey,
@@ -14,12 +16,9 @@ pub struct RemoveCreatorVerificationInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for RemoveCreatorVerification {
     type ArrangedAccounts = RemoveCreatorVerificationInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [metadata, creator, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let metadata = accounts.get(0)?;
+        let creator = accounts.get(1)?;
 
         Some(RemoveCreatorVerificationInstructionAccounts {
             metadata: metadata.pubkey,

@@ -17,12 +17,11 @@ pub struct AssignWithSeedAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for AssignWithSeed {
     type ArrangedAccounts = AssignWithSeedAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [assigned_account, base_account, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let assigned_account = accounts.get(0)?;
+        let base_account = accounts.get(1)?;
 
         Some(AssignWithSeedAccounts {
             assigned_account: assigned_account.pubkey,

@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -18,12 +17,13 @@ pub struct InitializeBinArrayInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializeBinArray {
     type ArrangedAccounts = InitializeBinArrayInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [lb_pair, bin_array, funder, system_program, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let lb_pair = accounts.get(0)?;
+        let bin_array = accounts.get(1)?;
+        let funder = accounts.get(2)?;
+        let system_program = accounts.get(3)?;
 
         Some(InitializeBinArrayInstructionAccounts {
             lb_pair: lb_pair.pubkey,

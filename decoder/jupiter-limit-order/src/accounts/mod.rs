@@ -1,8 +1,7 @@
-use {
-    super::JupiterLimitOrderDecoder,
-    crate::PROGRAM_ID,
-    solana_indexer_core::{account::AccountDecoder, deserialize::IndexerDeserialize},
-};
+use solana_indexer_core::account::AccountDecoder;
+use solana_indexer_core::deserialize::IndexerDeserialize;
+
+use super::JupiterLimitOrderDecoder;
 pub mod fee;
 pub mod order;
 
@@ -11,16 +10,12 @@ pub enum JupiterLimitOrderAccount {
     Order(order::Order),
 }
 
-impl AccountDecoder<'_> for JupiterLimitOrderDecoder {
+impl<'a> AccountDecoder<'a> for JupiterLimitOrderDecoder {
     type AccountType = JupiterLimitOrderAccount;
     fn decode_account(
         &self,
         account: &solana_sdk::account::Account,
     ) -> Option<solana_indexer_core::account::DecodedAccount<Self::AccountType>> {
-        if !account.owner.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         if let Some(decoded_account) = fee::Fee::deserialize(account.data.as_slice()) {
             return Some(solana_indexer_core::account::DecodedAccount {
                 lamports: account.lamports,

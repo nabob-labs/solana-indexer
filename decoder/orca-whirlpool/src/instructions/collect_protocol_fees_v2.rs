@@ -1,13 +1,11 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use solana_indexer_core::{borsh, IndexerDeserialize};
+use super::super::types::*;
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x6780de8672c816c8")]
-pub struct CollectProtocolFeesV2 {
+pub struct CollectProtocolFeesV2{
     pub remaining_accounts_info: Option<RemainingAccountsInfo>,
 }
 
@@ -29,14 +27,19 @@ pub struct CollectProtocolFeesV2InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CollectProtocolFeesV2 {
     type ArrangedAccounts = CollectProtocolFeesV2InstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [whirlpools_config, whirlpool, collect_protocol_fees_authority, token_mint_a, token_mint_b, token_vault_a, token_vault_b, token_destination_a, token_destination_b, token_program_a, token_program_b, memo_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let whirlpools_config = accounts.get(0)?;
+        let whirlpool = accounts.get(1)?;
+        let collect_protocol_fees_authority = accounts.get(2)?;
+        let token_mint_a = accounts.get(3)?;
+        let token_mint_b = accounts.get(4)?;
+        let token_vault_a = accounts.get(5)?;
+        let token_vault_b = accounts.get(6)?;
+        let token_destination_a = accounts.get(7)?;
+        let token_destination_b = accounts.get(8)?;
+        let token_program_a = accounts.get(9)?;
+        let token_program_b = accounts.get(10)?;
+        let memo_program = accounts.get(11)?;
 
         Some(CollectProtocolFeesV2InstructionAccounts {
             whirlpools_config: whirlpools_config.pubkey,

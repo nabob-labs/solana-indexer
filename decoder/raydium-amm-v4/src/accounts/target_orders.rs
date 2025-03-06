@@ -1,7 +1,5 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
+use super::super::types::*;
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
 pub(crate) const TARGET_ORDERS_SIZE: usize = std::mem::size_of::<TargetOrders>();
 

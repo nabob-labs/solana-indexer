@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0xa1b028d53cb8b3e4")]
-pub struct UpdateAdmin {}
+pub struct UpdateAdmin{
+}
 
 pub struct UpdateAdminInstructionAccounts {
     pub pending_admin: solana_sdk::pubkey::Pubkey,
@@ -14,12 +16,9 @@ pub struct UpdateAdminInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for UpdateAdmin {
     type ArrangedAccounts = UpdateAdminInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [pending_admin, vault_state, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let pending_admin = accounts.get(0)?;
+        let vault_state = accounts.get(1)?;
 
         Some(UpdateAdminInstructionAccounts {
             pending_admin: pending_admin.pubkey,

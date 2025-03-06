@@ -1,9 +1,16 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 pub enum EscrowAuthority {
     TokenOwner,
-    Creator(solana_sdk::pubkey::Pubkey),
+    Creator
+                (
+                    solana_sdk::pubkey::Pubkey,
+                )
+    ,
 }
+
+

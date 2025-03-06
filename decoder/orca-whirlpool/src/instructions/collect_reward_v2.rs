@@ -1,13 +1,11 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use solana_indexer_core::{borsh, IndexerDeserialize};
+use super::super::types::*;
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0xb16b25b4a01331d1")]
-pub struct CollectRewardV2 {
+pub struct CollectRewardV2{
     pub reward_index: u8,
     pub remaining_accounts_info: Option<RemainingAccountsInfo>,
 }
@@ -27,14 +25,16 @@ pub struct CollectRewardV2InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CollectRewardV2 {
     type ArrangedAccounts = CollectRewardV2InstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [whirlpool, position_authority, position, position_token_account, reward_owner_account, reward_mint, reward_vault, reward_token_program, memo_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let whirlpool = accounts.get(0)?;
+        let position_authority = accounts.get(1)?;
+        let position = accounts.get(2)?;
+        let position_token_account = accounts.get(3)?;
+        let reward_owner_account = accounts.get(4)?;
+        let reward_mint = accounts.get(5)?;
+        let reward_vault = accounts.get(6)?;
+        let reward_token_program = accounts.get(7)?;
+        let memo_program = accounts.get(8)?;
 
         Some(CollectRewardV2InstructionAccounts {
             whirlpool: whirlpool.pubkey,

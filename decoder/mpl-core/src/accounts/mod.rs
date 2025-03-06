@@ -1,8 +1,7 @@
-use {
-    super::MplCoreProgramDecoder,
-    crate::PROGRAM_ID,
-    solana_indexer_core::{account::AccountDecoder, deserialize::IndexerDeserialize},
-};
+use solana_indexer_core::account::AccountDecoder;
+use solana_indexer_core::deserialize::IndexerDeserialize;
+
+use super::MplCoreProgramDecoder;
 pub mod asset_v1;
 pub mod collection_v1;
 pub mod hashed_asset_v1;
@@ -17,16 +16,12 @@ pub enum MplCoreProgramAccount {
     HashedAssetV1(hashed_asset_v1::HashedAssetV1),
 }
 
-impl AccountDecoder<'_> for MplCoreProgramDecoder {
+impl<'a> AccountDecoder<'a> for MplCoreProgramDecoder {
     type AccountType = MplCoreProgramAccount;
     fn decode_account(
         &self,
         account: &solana_sdk::account::Account,
     ) -> Option<solana_indexer_core::account::DecodedAccount<Self::AccountType>> {
-        if !account.owner.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         if let Some(decoded_account) =
             plugin_header_v1::PluginHeaderV1::deserialize(account.data.as_slice())
         {

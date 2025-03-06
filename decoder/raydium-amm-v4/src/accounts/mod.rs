@@ -1,29 +1,24 @@
-use {
-    super::RaydiumAmmV4Decoder,
-    crate::PROGRAM_ID,
-    solana_indexer_core::{account::AccountDecoder, deserialize::IndexerDeserialize},
-};
+use solana_indexer_core::account::AccountDecoder;
+use solana_indexer_core::deserialize::IndexerDeserialize;
+
+use super::RaydiumAmmV4Decoder;
 pub mod amm_info;
 pub mod fees;
 pub mod target_orders;
 
-#[allow(clippy::large_enum_variant)]
 pub enum RaydiumAmmV4Account {
     TargetOrders(target_orders::TargetOrders),
     Fees(fees::Fees),
     AmmInfo(amm_info::AmmInfo),
 }
 
-impl AccountDecoder<'_> for RaydiumAmmV4Decoder {
+impl<'a> AccountDecoder<'a> for RaydiumAmmV4Decoder {
     type AccountType = RaydiumAmmV4Account;
+
     fn decode_account(
         &self,
         account: &solana_sdk::account::Account,
     ) -> Option<solana_indexer_core::account::DecodedAccount<Self::AccountType>> {
-        if !account.owner.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         let data_size = account.data.len();
 
         match data_size {

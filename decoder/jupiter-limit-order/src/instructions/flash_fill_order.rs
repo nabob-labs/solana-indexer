@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -28,14 +27,23 @@ pub struct FlashFillOrderInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for FlashFillOrder {
     type ArrangedAccounts = FlashFillOrderInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [order, reserve, maker, taker, maker_output_account, taker_input_account, fee_authority, program_fee_account, referral, input_mint, input_mint_token_program, output_mint, output_mint_token_program, system_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let order = accounts.get(0)?;
+        let reserve = accounts.get(1)?;
+        let maker = accounts.get(2)?;
+        let taker = accounts.get(3)?;
+        let maker_output_account = accounts.get(4)?;
+        let taker_input_account = accounts.get(5)?;
+        let fee_authority = accounts.get(6)?;
+        let program_fee_account = accounts.get(7)?;
+        let referral = accounts.get(8)?;
+        let input_mint = accounts.get(9)?;
+        let input_mint_token_program = accounts.get(10)?;
+        let output_mint = accounts.get(11)?;
+        let output_mint_token_program = accounts.get(12)?;
+        let system_program = accounts.get(13)?;
 
         Some(FlashFillOrderInstructionAccounts {
             order: order.pubkey,

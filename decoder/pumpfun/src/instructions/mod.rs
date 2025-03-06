@@ -1,4 +1,4 @@
-use crate::PROGRAM_ID;
+
 
 use super::PumpfunDecoder;
 pub mod buy;
@@ -35,17 +35,13 @@ pub enum PumpfunInstruction {
     SetParamsEvent(set_params_event::SetParamsEvent),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for PumpfunDecoder {
+impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for PumpfunDecoder {
     type InstructionType = PumpfunInstruction;
 
     fn decode_instruction(
         &self,
         instruction: &solana_sdk::instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
-        if !instruction.program_id.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         solana_indexer_core::try_decode_instructions!(instruction,
             PumpfunInstruction::Initialize => initialize::Initialize,
             PumpfunInstruction::SetParams => set_params::SetParams,

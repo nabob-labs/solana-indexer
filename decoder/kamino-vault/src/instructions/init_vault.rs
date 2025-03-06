@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x4d4f559621d9346a")]
-pub struct InitVault {}
+pub struct InitVault{
+}
 
 pub struct InitVaultInstructionAccounts {
     pub admin_authority: solana_sdk::pubkey::Pubkey,
@@ -22,14 +24,17 @@ pub struct InitVaultInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitVault {
     type ArrangedAccounts = InitVaultInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [admin_authority, vault_state, base_vault_authority, token_vault, base_token_mint, shares_mint, system_program, rent, token_program, shares_token_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let admin_authority = accounts.get(0)?;
+        let vault_state = accounts.get(1)?;
+        let base_vault_authority = accounts.get(2)?;
+        let token_vault = accounts.get(3)?;
+        let base_token_mint = accounts.get(4)?;
+        let shares_mint = accounts.get(5)?;
+        let system_program = accounts.get(6)?;
+        let rent = accounts.get(7)?;
+        let token_program = accounts.get(8)?;
+        let shares_token_program = accounts.get(9)?;
 
         Some(InitVaultInstructionAccounts {
             admin_authority: admin_authority.pubkey,

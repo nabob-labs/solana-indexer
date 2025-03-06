@@ -1,36 +1,30 @@
-use {
-    async_trait::async_trait,
-    futures::{sink::SinkExt, StreamExt},
-    solana_grpc_client::GeyserGrpcClient,
-    solana_grpc_proto::{
-        convert_from::{create_tx_meta, create_tx_versioned},
-        geyser::{
-            subscribe_update::UpdateOneof, CommitmentLevel, SubscribeRequest,
-            SubscribeRequestFilterAccounts, SubscribeRequestFilterTransactions,
-            SubscribeRequestPing,
-        },
-        tonic::transport::ClientTlsConfig,
+use async_trait::async_trait;
+use solana_indexer_core::datasource::AccountDeletion;
+use solana_indexer_core::metrics::MetricsCollection;
+use solana_indexer_core::{
+    datasource::{AccountUpdate, Datasource, TransactionUpdate, Update, UpdateType},
+    error::IndexerResult,
+};
+use futures::{sink::SinkExt, StreamExt};
+use solana_sdk::{account::Account, pubkey::Pubkey, signature::Signature};
+use std::collections::HashSet;
+use std::convert::TryFrom;
+use std::time::Duration;
+use std::{collections::HashMap, sync::Arc};
+use tokio::sync::{mpsc::UnboundedSender, RwLock};
+use tokio_util::sync::CancellationToken;
+use solana_grpc_client::GeyserGrpcClient;
+use solana_grpc_proto::tonic::transport::ClientTlsConfig;
+use solana_grpc_proto::{
+    convert_from::{create_tx_meta, create_tx_versioned},
+    geyser::{
+        subscribe_update::UpdateOneof, CommitmentLevel, SubscribeRequest,
+        SubscribeRequestFilterAccounts, SubscribeRequestFilterTransactions, SubscribeRequestPing,
     },
-    solana_indexer_core::{
-        datasource::{
-            AccountDeletion, AccountUpdate, Datasource, TransactionUpdate, Update, UpdateType,
-        },
-        error::IndexerResult,
-        metrics::MetricsCollection,
-    },
-    solana_sdk::{account::Account, pubkey::Pubkey, signature::Signature},
-    std::{
-        collections::{HashMap, HashSet},
-        convert::TryFrom,
-        sync::Arc,
-        time::Duration,
-    },
-    tokio::sync::{mpsc::UnboundedSender, RwLock},
-    tokio_util::sync::CancellationToken,
 };
 
 #[derive(Debug)]
-pub struct SolanaGrpcGeyserClient {
+pub struct YellowstoneGrpcGeyserClient {
     pub endpoint: String,
     pub x_token: Option<String>,
     pub commitment: Option<CommitmentLevel>,
@@ -39,7 +33,7 @@ pub struct SolanaGrpcGeyserClient {
     pub account_deletions_tracked: Arc<RwLock<HashSet<Pubkey>>>,
 }
 
-impl SolanaGrpcGeyserClient {
+impl YellowstoneGrpcGeyserClient {
     pub fn new(
         endpoint: String,
         x_token: Option<String>,
@@ -48,7 +42,7 @@ impl SolanaGrpcGeyserClient {
         transaction_filters: HashMap<String, SubscribeRequestFilterTransactions>,
         account_deletions_tracked: Arc<RwLock<HashSet<Pubkey>>>,
     ) -> Self {
-        SolanaGrpcGeyserClient {
+        YellowstoneGrpcGeyserClient {
             endpoint,
             x_token,
             commitment,
@@ -60,7 +54,7 @@ impl SolanaGrpcGeyserClient {
 }
 
 #[async_trait]
-impl Datasource for SolanaGrpcGeyserClient {
+impl Datasource for YellowstoneGrpcGeyserClient {
     async fn consume(
         &self,
         sender: &UnboundedSender<Update>,
@@ -76,24 +70,16 @@ impl Datasource for SolanaGrpcGeyserClient {
         let account_deletions_tracked = self.account_deletions_tracked.clone();
 
         let mut geyser_client = GeyserGrpcClient::build_from_shared(endpoint)
-            .map_err(|err| {
-                solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string())
-            })?
+            .map_err(|err| solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string()))?
             .x_token(x_token)
-            .map_err(|err| {
-                solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string())
-            })?
+            .map_err(|err| solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string()))?
             .connect_timeout(Duration::from_secs(15))
             .timeout(Duration::from_secs(15))
             .tls_config(ClientTlsConfig::new().with_enabled_roots())
-            .map_err(|err| {
-                solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string())
-            })?
+            .map_err(|err| solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string()))?
             .connect()
             .await
-            .map_err(|err| {
-                solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string())
-            })?;
+            .map_err(|err| solana_indexer_core::error::Error::FailedToConsumeDatasource(err.to_string()))?;
 
         tokio::spawn(async move {
             let subscribe_request = SubscribeRequest {
@@ -158,7 +144,7 @@ impl Datasource for SolanaGrpcGeyserClient {
                                                             account_deletions_tracked.read().await;
                                                         if accounts.contains(&account_pubkey) {
                                                             let account_deletion = AccountDeletion {
-                                                                pubkey: account_pubkey,
+                                                                pubkey: account_pubkey.clone(),
                                                                 slot: account_update.slot,
                                                             };
                                                             if let Err(e) = sender.send(
@@ -231,14 +217,13 @@ impl Datasource for SolanaGrpcGeyserClient {
                                                             continue;
                                                         }
                                                     };
-                                                    let update = Update::Transaction(Box::new(TransactionUpdate {
-                                                        signature,
+                                                    let update = Update::Transaction(TransactionUpdate {
+                                                        signature: signature,
                                                         transaction: versioned_transaction,
                                                         meta: meta_original,
                                                         is_vote: transaction_info.is_vote,
                                                         slot: transaction_update.slot,
-                                                        block_time: None,
-                                                    }));
+                                                    });
                                                     if let Err(e) = sender.send(update) {
                                                         log::error!("Failed to send transaction update with signature {:?} at slot {}: {:?}", signature, transaction_update.slot, e);
                                                         continue;

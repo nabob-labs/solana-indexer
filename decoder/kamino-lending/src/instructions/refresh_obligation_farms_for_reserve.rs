@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x8c90fd150a4af803")]
-pub struct RefreshObligationFarmsForReserve {
+pub struct RefreshObligationFarmsForReserve{
     pub mode: u8,
 }
 
@@ -24,14 +25,17 @@ pub struct RefreshObligationFarmsForReserveInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for RefreshObligationFarmsForReserve {
     type ArrangedAccounts = RefreshObligationFarmsForReserveInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [crank, obligation, lending_market_authority, reserve, reserve_farm_state, obligation_farm_user_state, lending_market, farms_program, rent, system_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let crank = accounts.get(0)?;
+        let obligation = accounts.get(1)?;
+        let lending_market_authority = accounts.get(2)?;
+        let reserve = accounts.get(3)?;
+        let reserve_farm_state = accounts.get(4)?;
+        let obligation_farm_user_state = accounts.get(5)?;
+        let lending_market = accounts.get(6)?;
+        let farms_program = accounts.get(7)?;
+        let rent = accounts.get(8)?;
+        let system_program = accounts.get(9)?;
 
         Some(RefreshObligationFarmsForReserveInstructionAccounts {
             crank: crank.pubkey,

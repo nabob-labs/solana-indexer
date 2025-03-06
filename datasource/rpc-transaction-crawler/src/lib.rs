@@ -1,28 +1,26 @@
-use {
-    async_trait::async_trait,
-    solana_indexer_core::{
-        datasource::{Datasource, TransactionUpdate, Update, UpdateType},
-        error::IndexerResult,
-        metrics::MetricsCollection,
-        transformers::transaction_metadata_from_original_meta,
-    },
-    futures::StreamExt,
-    solana_client::{
-        nonblocking::rpc_client::RpcClient, rpc_client::GetConfirmedSignaturesForAddress2Config,
-        rpc_config::RpcTransactionConfig,
-    },
-    solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey, signature::Signature},
-    solana_transaction_status::{
-        EncodedConfirmedTransactionWithStatusMeta, UiLoadedAddresses, UiTransactionEncoding,
-    },
-    std::{collections::HashSet, str::FromStr, sync::Arc, time::Duration},
-    tokio::{
-        sync::mpsc::{self, Receiver, Sender},
-        task::JoinHandle,
-        time::Instant,
-    },
-    tokio_util::sync::CancellationToken,
+use async_trait::async_trait;
+use futures::StreamExt;
+use solana_client::{
+    nonblocking::rpc_client::RpcClient, rpc_client::GetConfirmedSignaturesForAddress2Config,
+    rpc_config::RpcTransactionConfig,
 };
+use solana_indexer_core::{
+    datasource::{Datasource, TransactionUpdate, Update, UpdateType},
+    error::IndexerResult,
+    metrics::MetricsCollection,
+    transformers::transaction_metadata_from_original_meta,
+};
+use solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey, signature::Signature};
+use solana_transaction_status::{
+    EncodedConfirmedTransactionWithStatusMeta, UiLoadedAddresses, UiTransactionEncoding,
+};
+use std::{collections::HashSet, str::FromStr, sync::Arc, time::Duration};
+use tokio::{
+    sync::mpsc::{self, Receiver, Sender},
+    task::JoinHandle,
+    time::Instant,
+};
+use tokio_util::sync::CancellationToken;
 
 #[derive(Debug, Clone)]
 pub struct Filters {
@@ -146,7 +144,6 @@ impl Datasource for RpcTransactionCrawler {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
 fn signature_fetcher(
     rpc_client: Arc<RpcClient>,
     account: Pubkey,
@@ -159,8 +156,11 @@ fn signature_fetcher(
     metrics: Arc<MetricsCollection>,
 ) -> JoinHandle<()> {
     let rpc_client = Arc::clone(&rpc_client);
+    let account = account;
+    let batch_limit = batch_limit;
     let filters = filters.clone();
     let signature_sender = signature_sender.clone();
+    let polling_interval = polling_interval;
 
     tokio::spawn(async move {
         let mut last_fetched_signature = filters.before_signature;
@@ -178,6 +178,7 @@ fn signature_fetcher(
                         until: filters.until_signature,
                         limit: Some(batch_limit),
                         commitment: Some(commitment.unwrap_or(CommitmentConfig::confirmed())),
+                        ..Default::default()
                     }
                 ) => {
                     match result {
@@ -264,6 +265,7 @@ fn transaction_fetcher(
                                         commitment.unwrap_or(CommitmentConfig::confirmed()),
                                     ),
                                     max_supported_transaction_version: Some(0),
+                                    ..Default::default()
                                 },
                             )
                             .await
@@ -310,6 +312,7 @@ fn transaction_fetcher(
         tokio::select! {
             _ = cancellation_token.cancelled() => {
                 log::info!("Cancelling RPC Crawler transaction fetcher...");
+                return;
             }
             _ = fetch_stream_task => {}
         }
@@ -397,14 +400,13 @@ fn task_processor(
                         continue;
                     };
 
-                    let update = Update::Transaction(Box::new(TransactionUpdate {
+                    let update = Update::Transaction(TransactionUpdate {
                         signature,
                         transaction: decoded_transaction.clone(),
                         meta: meta_needed,
                         is_vote: false,
                         slot: fetched_transaction.slot,
-                        block_time: fetched_transaction.block_time,
-                    }));
+                    });
 
 
                     metrics

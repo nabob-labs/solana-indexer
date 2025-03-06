@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x02da8aeb4fc91966")]
-pub struct RefreshReserve {}
+pub struct RefreshReserve{
+}
 
 pub struct RefreshReserveInstructionAccounts {
     pub reserve: solana_sdk::pubkey::Pubkey,
@@ -18,14 +20,13 @@ pub struct RefreshReserveInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for RefreshReserve {
     type ArrangedAccounts = RefreshReserveInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [reserve, lending_market, pyth_oracle, switchboard_price_oracle, switchboard_twap_oracle, scope_prices, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let reserve = accounts.get(0)?;
+        let lending_market = accounts.get(1)?;
+        let pyth_oracle = accounts.get(2)?;
+        let switchboard_price_oracle = accounts.get(3)?;
+        let switchboard_twap_oracle = accounts.get(4)?;
+        let scope_prices = accounts.get(5)?;
 
         Some(RefreshReserveInstructionAccounts {
             reserve: reserve.pubkey,

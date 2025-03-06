@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x87e734a70734d4c1")]
-pub struct FlashBorrowReserveLiquidity {
+pub struct FlashBorrowReserveLiquidity{
     pub liquidity_amount: u64,
 }
 
@@ -26,14 +27,19 @@ pub struct FlashBorrowReserveLiquidityInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for FlashBorrowReserveLiquidity {
     type ArrangedAccounts = FlashBorrowReserveLiquidityInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [user_transfer_authority, lending_market_authority, lending_market, reserve, reserve_liquidity_mint, reserve_source_liquidity, user_destination_liquidity, reserve_liquidity_fee_receiver, referrer_token_state, referrer_account, sysvar_info, token_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let user_transfer_authority = accounts.get(0)?;
+        let lending_market_authority = accounts.get(1)?;
+        let lending_market = accounts.get(2)?;
+        let reserve = accounts.get(3)?;
+        let reserve_liquidity_mint = accounts.get(4)?;
+        let reserve_source_liquidity = accounts.get(5)?;
+        let user_destination_liquidity = accounts.get(6)?;
+        let reserve_liquidity_fee_receiver = accounts.get(7)?;
+        let referrer_token_state = accounts.get(8)?;
+        let referrer_account = accounts.get(9)?;
+        let sysvar_info = accounts.get(10)?;
+        let token_program = accounts.get(11)?;
 
         Some(FlashBorrowReserveLiquidityInstructionAccounts {
             user_transfer_authority: user_transfer_authority.pubkey,

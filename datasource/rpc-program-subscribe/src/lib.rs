@@ -1,22 +1,17 @@
-use {
-    async_trait::async_trait,
-    solana_indexer_core::{
-        datasource::{AccountUpdate, Datasource, Update, UpdateType},
-        error::IndexerResult,
-        metrics::MetricsCollection,
-    },
-    futures::StreamExt,
-    solana_client::{
-        nonblocking::pubsub_client::PubsubClient, rpc_config::RpcProgramAccountsConfig,
-    },
-    solana_sdk::{account::Account, pubkey::Pubkey},
-    std::{str::FromStr, sync::Arc, time::Duration},
-    tokio::sync::mpsc::UnboundedSender,
-    tokio_util::sync::CancellationToken,
+use async_trait::async_trait;
+use solana_indexer_core::{
+    datasource::{AccountUpdate, Datasource, Update, UpdateType},
+    error::IndexerResult,
+    metrics::MetricsCollection,
 };
-
-const MAX_RECONNECTION_ATTEMPTS: u32 = 10;
-const RECONNECTION_DELAY_MS: u64 = 3000;
+use futures::StreamExt;
+use solana_client::{
+    nonblocking::pubsub_client::PubsubClient, rpc_config::RpcProgramAccountsConfig,
+};
+use solana_sdk::{account::Account, pubkey::Pubkey};
+use std::{str::FromStr, sync::Arc};
+use tokio::sync::mpsc::UnboundedSender;
+use tokio_util::sync::CancellationToken;
 
 #[derive(Debug, Clone)]
 pub struct Filters {
@@ -55,111 +50,82 @@ impl Datasource for RpcProgramSubscribe {
         cancellation_token: CancellationToken,
         metrics: Arc<MetricsCollection>,
     ) -> IndexerResult<()> {
-        let mut reconnection_attempts = 0;
+        let client = PubsubClient::new(&self.rpc_ws_url).await.map_err(|err| {
+            solana_indexer_core::error::Error::Custom(format!(
+                "Failed to create an RPC subscribe client: {err}"
+            ))
+        })?;
 
-        loop {
-            if cancellation_token.is_cancelled() {
-                log::info!("Cancellation requested, stopping reconnection attempts");
-                break;
-            }
+        let filters = self.filters.clone();
+        let sender = sender.clone();
 
-            let client = match PubsubClient::new(&self.rpc_ws_url).await {
-                Ok(client) => client,
-                Err(err) => {
-                    log::error!("Failed to create RPC subscribe client: {}", err);
-                    reconnection_attempts += 1;
-                    if reconnection_attempts >= MAX_RECONNECTION_ATTEMPTS {
-                        return Err(solana_indexer_core::error::Error::Custom(format!(
-                            "Failed to create RPC subscribe client after {} attempts: {}",
-                            MAX_RECONNECTION_ATTEMPTS, err
-                        )));
-                    }
-                    tokio::time::sleep(Duration::from_millis(RECONNECTION_DELAY_MS)).await;
-                    continue;
-                }
-            };
-
-            let filters = self.filters.clone();
+        tokio::spawn(async move {
             let sender_clone = sender.clone();
-
-            let (mut program_stream, _program_unsub) = match client
+            let (mut stream, _unsub) = match client
                 .program_subscribe(&filters.pubkey, filters.program_subscribe_config)
                 .await
             {
                 Ok(subscription) => subscription,
                 Err(err) => {
-                    log::error!("Failed to subscribe to program updates: {:?}", err);
-                    reconnection_attempts += 1;
-                    if reconnection_attempts > MAX_RECONNECTION_ATTEMPTS {
-                        return Err(solana_indexer_core::error::Error::Custom(format!(
-                            "Failed to subscribe after {} attempts: {}",
-                            MAX_RECONNECTION_ATTEMPTS, err
-                        )));
-                    }
-                    tokio::time::sleep(Duration::from_millis(RECONNECTION_DELAY_MS)).await;
-                    continue;
+                    log::error!("Failed to subscribe to blocks updates: {:?}", err);
+                    return;
                 }
             };
-
-            reconnection_attempts = 0;
 
             loop {
                 tokio::select! {
                     _ = cancellation_token.cancelled() => {
-                        log::info!("Cancellation requested, stopping subscription...");
-                        return Ok(());
+                        log::info!("Cancelling RPC program subscription...");
+                        break;
                     }
-                    event_result = program_stream.next() => {
+                    event_result = stream.next() => {
                         match event_result {
                             Some(acc_event) => {
-                                let start_time = std::time::Instant::now();
-                                let decoded_account: Account = match acc_event.value.account.decode() {
-                                    Some(account_data) => account_data,
-                                    None => {
-                                        log::error!("Error decoding account event");
+                                    let start_time = std::time::Instant::now();
+                                    let decoded_account: Account = match acc_event.value.account.decode() {
+                                        Some(account_data) => account_data,
+                                        None => {
+                                            log::error!("Error decoding Helius WS Account event");
+                                            continue;
+                                        }
+                                    };
+
+                                    let Ok(account_pubkey) = Pubkey::from_str(&acc_event.value.pubkey) else {
+                                        log::error!("Error parsing account pubkey. Value: {}", &acc_event.value.pubkey);
                                         continue;
+                                    };
+
+                                    let update = Update::Account(AccountUpdate {
+                                        pubkey: account_pubkey,
+                                        account: decoded_account,
+                                        slot: acc_event.context.slot,
+                                    });
+
+                                    metrics
+                                            .record_histogram(
+                                                "program_subscribe_account_process_time_nanoseconds",
+                                                start_time.elapsed().as_nanos() as f64
+                                            )
+                                            .await
+                                            .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
+
+                                    metrics.increment_counter("program_subscribe_accounts_processed", 1).await.unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
+
+
+                                    if let Err(err) = sender_clone.send(update) {
+                                        log::error!("Error sending account update: {:?}", err);
+                                        break;
                                     }
-                                };
-
-                                let Ok(account_pubkey) = Pubkey::from_str(&acc_event.value.pubkey) else {
-                                    log::error!("Error parsing account pubkey. Value: {}", &acc_event.value.pubkey);
-                                    continue;
-                                };
-
-                                let update = Update::Account(AccountUpdate {
-                                    pubkey: account_pubkey,
-                                    account: decoded_account,
-                                    slot: acc_event.context.slot,
-                                });
-
-                                metrics
-                                    .record_histogram(
-                                        "program_subscribe_account_process_time_nanoseconds",
-                                        start_time.elapsed().as_nanos() as f64
-                                    )
-                                    .await
-                                    .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
-
-                                metrics.increment_counter("program_subscribe_accounts_processed", 1)
-                                    .await
-                                    .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
-
-                                if let Err(err) = sender_clone.send(update) {
-                                    log::error!("Error sending account update: {:?}", err);
-                                    break;
-                                }
                             }
                             None => {
-                                log::warn!("Program accounts stream has been closed, attempting to reconnect...");
+                                log::info!("Program accounts stream has been closed");
                                 break;
                             }
                         }
                     }
                 }
             }
-
-            tokio::time::sleep(Duration::from_millis(RECONNECTION_DELAY_MS)).await;
-        }
+        });
 
         Ok(())
     }

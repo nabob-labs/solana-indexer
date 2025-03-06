@@ -10,39 +10,21 @@ members = [
     "datasource/rpc-program-subscribe",
     "datasource/rpc-transaction-crawler",
     "datasource/grpc-highway-gateway",
-    "decoder/drift-v2",
-    "decoder/fluxbeam",
     "decoder/jupiter-dca",
     "decoder/jupiter-limit-order-2",
     "decoder/jupiter-limit-order",
-    "decoder/jupiter-perpetuals",
     "decoder/jupiter-swap",
     "decoder/kamino-lending",
     "decoder/kamino-vault",
-    "decoder/lifinity-amm-v2",
     "decoder/memo-program",
     "decoder/meteora-dlmm",
-    "decoder/moonshot",
     "decoder/mpl-core",
     "decoder/mpl-token-metadata",
-    "decoder/name-service",
-    "decoder/openbook-v2",
     "decoder/orca-whirlpool",
-    "decoder/phoenix-v1",
     "decoder/pumpfun",
     "decoder/raydium-amm-v4",
-    "decoder/raydium-clmm",
-    "decoder/raydium-cpmm",
-    "decoder/raydium-liquidity-locking",
-    "decoder/sharky",
-    "decoder/spl-associated-token-account",
-    "decoder/stabble-stable-swap",
-    "decoder/stabble-weighted-swap",
     "decoder/system-program",
-    "decoder/token-2022",
     "decoder/token-program",
-    "decoder/zeta",
-    "decoder/okx-dex",
 ]
 
 resolver = "2"
@@ -66,46 +48,28 @@ solana-indexer-datasource-rpc-block-subscribe = { path = "datasource/rpc-block-s
 solana-indexer-datasource-rpc-program-subscribe = { path = "datasource/rpc-program-subscribe" }
 solana-indexer-datasource-rpc-transaction-crawler = { path = "datasource/rpc-transaction-crawler" }
 solana-indexer-datasource-grpc-highway-gateway = { path = "datasource/grpc-highway-gateway" }
-solana-indexer-decoding-drift-v2 = { path = "decoder/drift-v2" }
-solana-indexer-decoding-fluxbeam = { path = "decoder/fluxbeam" }
 solana-indexer-decoding-jupiter-dca = { path = "decoder/jupiter-dca" }
 solana-indexer-decoding-jupiter-limit-order-2 = { path = "decoder/jupiter-limit-order-2" }
 solana-indexer-decoding-jupiter-limit-order = { path = "decoder/jupiter-limit-order" }
-solana-indexer-decoding-jupiter-perpetuals = { path = "decoder/jupiter-perpetuals" }
 solana-indexer-decoding-jupiter-swap = { path = "decoder/jupiter-swap" }
 solana-indexer-decoding-kamino-lending = { path = "decoder/kamino-lending" }
 solana-indexer-decoding-kamino-vault = { path = "decoder/kamino-vault" }
-solana-indexer-decoding-lifinity-amm-v2 = { path = "decoder/lifinity-amm-v2" }
 solana-indexer-decoding-memo-program = { path = "decoder/memo-program" }
 solana-indexer-decoding-meteora-dlmm = { path = "decoder/meteora-dlmm" }
-solana-indexer-decoding-moonshot = { path = "decoder/moonshot" }
 solana-indexer-decoding-mpl-core = { path = "decoder/mpl-core" }
 solana-indexer-decoding-mpl-token-metadata = { path = "decoder/mpl-token-metadata" }
-solana-indexer-decoding-name-service = { path = "decoder/name-service" }
-solana-indexer-decoding-okx-dex = { path = "decoder/okx-dex" }
-solana-indexer-decoding-openbook-v2 = { path = "decoder/openbook-v2" }
 solana-indexer-decoding-orca-whirlpool = { path = "decoder/orca-whirlpool" }
-solana-indexer-decoding-phoenix-v1 = { path = "decoder/phoenix-v1" }
 solana-indexer-decoding-pumpfun = { path = "decoder/pumpfun" }
 solana-indexer-decoding-raydium-amm-v4 = { path = "decoder/raydium-amm-v4" }
-solana-indexer-decoding-raydium-clmm = { path = "decoder/raydium-clmm" }
-solana-indexer-decoding-raydium-cpmm = { path = "decoder/raydium-cpmm" }
-solana-indexer-decoding-raydium-liquidity-locking = { path = "decoder/raydium-liquidity-locking" }
-solana-indexer-decoding-sharky = { path = "decoder/sharky" }
-solana-indexer-decoding-spl-associated-token-account = { path = "decoder/spl-associated-token-account" }
-solana-indexer-decoding-stabble-stable-swap = { path = "decoder/stabble-stable-swap" }
-solana-indexer-decoding-stabble-weighted-swap = { path = "decoder/stabble-weighted-swap" }
 solana-indexer-decoding-system-program = { path = "decoder/system-program" }
-solana-indexer-decoding-token-2022 = { path = "decoder/token-2022" }
 solana-indexer-decoding-token-program = { path = "decoder/token-program" }
-solana-indexer-decoding-zeta = { path = "decoder/zeta" }
 
-solana-account = { git = "https://github.com/nabob-labs/solana-spe.git" }
-solana-client = { git = "https://github.com/nabob-labs/solana-spe.git" }
-solana-sdk = { git = "https://github.com/nabob-labs/solana-spe.git" }
-solana-transaction-status = { git = "https://github.com/nabob-labs/solana-spe.git" }
-spl-memo = { git = "https://github.com/nabob-labs/solana-spe.git" }
-spl-token = { git = "https://github.com/nabob-labs/solana-spe.git" }
+solana-account = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
+solana-client = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
+solana-sdk = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
+solana-transaction-status = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
+spl-memo = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
+spl-token = { git = "https://github.com/nabob-labs/solana-spe.git", branch = "2.0.24" }
 
 # other
 anyhow = "1.0.96"
@@ -144,8 +108,8 @@ tokio = { version = "1.43.0" }
 tokio-retry = "0.3.0"
 tokio-util = "0.7.13"
 unicode-xid = "0.2"
-solana-grpc-client = { git = "https://github.com/nabob-labs/solana-grpc.git" }
-solana-grpc-proto = { git = "https://github.com/nabob-labs/solana-grpc.git"}
+solana-grpc-client = { git = "https://github.com/nabob-labs/solana-grpc.git", branch = "stable" }
+solana-grpc-proto = { git = "https://github.com/nabob-labs/solana-grpc.git", branch = "stable"}
 
 [patch.crates-io.curve25519-dalek]
 git = "https://github.com/anza-xyz/curve25519-dalek.git"

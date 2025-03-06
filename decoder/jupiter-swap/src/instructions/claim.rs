@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -17,12 +16,12 @@ pub struct ClaimInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Claim {
     type ArrangedAccounts = ClaimInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [wallet, program_authority, system_program, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let wallet = accounts.get(0)?;
+        let program_authority = accounts.get(1)?;
+        let system_program = accounts.get(2)?;
 
         Some(ClaimInstructionAccounts {
             wallet: wallet.pubkey,

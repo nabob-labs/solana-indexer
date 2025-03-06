@@ -12,10 +12,10 @@ pub struct InitializeImmutableOwnerAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializeImmutableOwner {
     type ArrangedAccounts = InitializeImmutableOwnerAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let account = accounts.first()?;
+        let account = accounts.get(0)?;
 
         Some(InitializeImmutableOwnerAccounts {
             account: account.pubkey,

@@ -1,13 +1,11 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use solana_indexer_core::{borsh, IndexerDeserialize};
+use super::super::types::*;
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x8080d05bf6351fb0")]
-pub struct UpdateFeeParameters {
+pub struct UpdateFeeParameters{
     pub fee_parameter: FeeParameter,
 }
 
@@ -21,12 +19,11 @@ pub struct UpdateFeeParametersInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for UpdateFeeParameters {
     type ArrangedAccounts = UpdateFeeParametersInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [lb_pair, admin, event_authority, program, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let lb_pair = accounts.get(0)?;
+        let admin = accounts.get(1)?;
+        let event_authority = accounts.get(2)?;
+        let program = accounts.get(3)?;
 
         Some(UpdateFeeParametersInstructionAccounts {
             lb_pair: lb_pair.pubkey,

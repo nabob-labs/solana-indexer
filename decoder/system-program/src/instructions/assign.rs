@@ -14,10 +14,10 @@ pub struct AssignAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Assign {
     type ArrangedAccounts = AssignAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let assigned_account = accounts.first()?;
+        let assigned_account = accounts.get(0)?;
 
         Some(AssignAccounts {
             assigned_account: assigned_account.pubkey,

@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -20,14 +19,15 @@ pub struct WithdrawSrmInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for WithdrawSrm {
     type ArrangedAccounts = WithdrawSrmInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [token_program, amm, amm_owner_account, amm_authority, srm_token, dest_srm_token, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let token_program = accounts.get(0)?;
+        let amm = accounts.get(1)?;
+        let amm_owner_account = accounts.get(2)?;
+        let amm_authority = accounts.get(3)?;
+        let srm_token = accounts.get(4)?;
+        let dest_srm_token = accounts.get(5)?;
 
         Some(WithdrawSrmInstructionAccounts {
             token_program: token_program.pubkey,

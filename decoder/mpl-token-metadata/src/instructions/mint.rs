@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x2b")]
-pub struct Mint {
+pub struct Mint{
     pub mint_args: MintArgs,
 }
 
@@ -32,14 +31,22 @@ pub struct MintInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Mint {
     type ArrangedAccounts = MintInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [token, token_owner, metadata, master_edition, token_record, mint, authority, delegate_record, payer, system_program, sysvar_instructions, spl_token_program, spl_ata_program, authorization_rules_program, authorization_rules, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let token = accounts.get(0)?;
+        let token_owner = accounts.get(1)?;
+        let metadata = accounts.get(2)?;
+        let master_edition = accounts.get(3)?;
+        let token_record = accounts.get(4)?;
+        let mint = accounts.get(5)?;
+        let authority = accounts.get(6)?;
+        let delegate_record = accounts.get(7)?;
+        let payer = accounts.get(8)?;
+        let system_program = accounts.get(9)?;
+        let sysvar_instructions = accounts.get(10)?;
+        let spl_token_program = accounts.get(11)?;
+        let spl_ata_program = accounts.get(12)?;
+        let authorization_rules_program = accounts.get(13)?;
+        let authorization_rules = accounts.get(14)?;
 
         Some(MintInstructionAccounts {
             token: token.pubkey,

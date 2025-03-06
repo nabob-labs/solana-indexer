@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x1e")]
-pub struct UpdateV2 {
+pub struct UpdateV2{
     pub update_v2_args: UpdateV2Args,
 }
 
@@ -24,14 +23,14 @@ pub struct UpdateV2InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for UpdateV2 {
     type ArrangedAccounts = UpdateV2InstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [asset, collection, payer, authority, new_collection, system_program, log_wrapper, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let asset = accounts.get(0)?;
+        let collection = accounts.get(1)?;
+        let payer = accounts.get(2)?;
+        let authority = accounts.get(3)?;
+        let new_collection = accounts.get(4)?;
+        let system_program = accounts.get(5)?;
+        let log_wrapper = accounts.get(6)?;
 
         Some(UpdateV2InstructionAccounts {
             asset: asset.pubkey,

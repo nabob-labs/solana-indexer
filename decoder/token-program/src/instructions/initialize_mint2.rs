@@ -16,10 +16,10 @@ pub struct InitializeMint2Accounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializeMint2 {
     type ArrangedAccounts = InitializeMint2Accounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let mint = accounts.first()?;
+        let mint = accounts.get(0)?;
 
         Some(InitializeMint2Accounts { mint: mint.pubkey })
     }

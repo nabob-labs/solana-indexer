@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -30,19 +29,37 @@ pub struct MonitorStepInstructionAccounts {
     pub serum_event_q: solana_sdk::pubkey::Pubkey,
     pub serum_bids: solana_sdk::pubkey::Pubkey,
     pub serum_asks: solana_sdk::pubkey::Pubkey,
+    pub serum_fee_discount: solana_sdk::pubkey::Pubkey,
+    pub referrer_pc_account: solana_sdk::pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for MonitorStep {
     type ArrangedAccounts = MonitorStepInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [token_program, rent, clock, amm, amm_authority, amm_open_orders, amm_target_orders, pool_coin_token_account, pool_pc_token_account, pool_withdraw_queue, serum_program, serum_market, serum_coin_vault_account, serum_pc_vault_account, serum_vault_signer, serum_req_q, serum_event_q, serum_bids, serum_asks, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let token_program = accounts.get(0)?;
+        let rent = accounts.get(1)?;
+        let clock = accounts.get(2)?;
+        let amm = accounts.get(3)?;
+        let amm_authority = accounts.get(4)?;
+        let amm_open_orders = accounts.get(5)?;
+        let amm_target_orders = accounts.get(6)?;
+        let pool_coin_token_account = accounts.get(7)?;
+        let pool_pc_token_account = accounts.get(8)?;
+        let pool_withdraw_queue = accounts.get(9)?;
+        let serum_program = accounts.get(10)?;
+        let serum_market = accounts.get(11)?;
+        let serum_coin_vault_account = accounts.get(12)?;
+        let serum_pc_vault_account = accounts.get(13)?;
+        let serum_vault_signer = accounts.get(14)?;
+        let serum_req_q = accounts.get(15)?;
+        let serum_event_q = accounts.get(16)?;
+        let serum_bids = accounts.get(17)?;
+        let serum_asks = accounts.get(18)?;
+        let serum_fee_discount = accounts.get(19)?;
+        let referrer_pc_account = accounts.get(20)?;
 
         Some(MonitorStepInstructionAccounts {
             token_program: token_program.pubkey,
@@ -64,6 +81,8 @@ impl solana_indexer_core::deserialize::ArrangeAccounts for MonitorStep {
             serum_event_q: serum_event_q.pubkey,
             serum_bids: serum_bids.pubkey,
             serum_asks: serum_asks.pubkey,
+            serum_fee_discount: serum_fee_discount.pubkey,
+            referrer_pc_account: referrer_pc_account.pubkey,
         })
     }
 }

@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -15,14 +14,12 @@ pub struct SetCollectProtocolFeesAuthorityInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for SetCollectProtocolFeesAuthority {
     type ArrangedAccounts = SetCollectProtocolFeesAuthorityInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [whirlpools_config, collect_protocol_fees_authority, new_collect_protocol_fees_authority, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let whirlpools_config = accounts.get(0)?;
+        let collect_protocol_fees_authority = accounts.get(1)?;
+        let new_collect_protocol_fees_authority = accounts.get(2)?;
 
         Some(SetCollectProtocolFeesAuthorityInstructionAccounts {
             whirlpools_config: whirlpools_config.pubkey,

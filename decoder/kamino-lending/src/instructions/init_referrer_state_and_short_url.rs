@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0xa513197f64371f5a")]
-pub struct InitReferrerStateAndShortUrl {
+pub struct InitReferrerStateAndShortUrl{
     pub short_url: String,
 }
 
@@ -20,14 +21,13 @@ pub struct InitReferrerStateAndShortUrlInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitReferrerStateAndShortUrl {
     type ArrangedAccounts = InitReferrerStateAndShortUrlInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [referrer, referrer_state, referrer_short_url, referrer_user_metadata, rent, system_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let referrer = accounts.get(0)?;
+        let referrer_state = accounts.get(1)?;
+        let referrer_short_url = accounts.get(2)?;
+        let referrer_user_metadata = accounts.get(3)?;
+        let rent = accounts.get(4)?;
+        let system_program = accounts.get(5)?;
 
         Some(InitReferrerStateAndShortUrlInstructionAccounts {
             referrer: referrer.pubkey,

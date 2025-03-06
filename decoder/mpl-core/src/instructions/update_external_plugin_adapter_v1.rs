@@ -1,7 +1,6 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
+use super::super::types::*;
+
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
@@ -24,13 +23,14 @@ impl solana_indexer_core::deserialize::ArrangeAccounts for UpdateExternalPluginA
     type ArrangedAccounts = UpdateExternalPluginAdapterV1InstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [asset, collection, payer, authority, system_program, log_wrapper, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let asset = accounts.get(0)?;
+        let collection = accounts.get(1)?;
+        let payer = accounts.get(2)?;
+        let authority = accounts.get(3)?;
+        let system_program = accounts.get(4)?;
+        let log_wrapper = accounts.get(5)?;
 
         Some(UpdateExternalPluginAdapterV1InstructionAccounts {
             asset: asset.pubkey,

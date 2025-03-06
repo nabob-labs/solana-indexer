@@ -1,7 +1,5 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
+use super::super::types::*;
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
@@ -24,20 +22,26 @@ pub struct AddLiquidityByStrategyOneSideInstructionAccounts {
     pub token_program: solana_sdk::pubkey::Pubkey,
     pub event_authority: solana_sdk::pubkey::Pubkey,
     pub program: solana_sdk::pubkey::Pubkey,
-    pub remaining_accounts: Vec<solana_sdk::instruction::AccountMeta>,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for AddLiquidityByStrategyOneSide {
     type ArrangedAccounts = AddLiquidityByStrategyOneSideInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [position, lb_pair, bin_array_bitmap_extension, user_token, reserve, token_mint, bin_array_lower, bin_array_upper, sender, token_program, event_authority, program, remaining_accounts @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let position = accounts.get(0)?;
+        let lb_pair = accounts.get(1)?;
+        let bin_array_bitmap_extension = accounts.get(2)?;
+        let user_token = accounts.get(3)?;
+        let reserve = accounts.get(4)?;
+        let token_mint = accounts.get(5)?;
+        let bin_array_lower = accounts.get(6)?;
+        let bin_array_upper = accounts.get(7)?;
+        let sender = accounts.get(8)?;
+        let token_program = accounts.get(9)?;
+        let event_authority = accounts.get(10)?;
+        let program = accounts.get(11)?;
 
         Some(AddLiquidityByStrategyOneSideInstructionAccounts {
             position: position.pubkey,
@@ -52,7 +56,6 @@ impl solana_indexer_core::deserialize::ArrangeAccounts for AddLiquidityByStrateg
             token_program: token_program.pubkey,
             event_authority: event_authority.pubkey,
             program: program.pubkey,
-            remaining_accounts: remaining_accounts.to_vec(),
         })
     }
 }

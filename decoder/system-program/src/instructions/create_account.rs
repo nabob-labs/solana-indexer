@@ -17,12 +17,11 @@ pub struct CreateAccountAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CreateAccount {
     type ArrangedAccounts = CreateAccountAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [funding_account, new_account, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let funding_account = accounts.get(0)?;
+        let new_account = accounts.get(1)?;
 
         Some(CreateAccountAccounts {
             funding_account: funding_account.pubkey,

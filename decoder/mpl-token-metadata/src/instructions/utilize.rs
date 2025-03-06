@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x13")]
-pub struct Utilize {
+pub struct Utilize{
     pub utilize_args: UtilizeArgs,
 }
 
@@ -28,14 +27,18 @@ pub struct UtilizeInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Utilize {
     type ArrangedAccounts = UtilizeInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [metadata, token_account, mint, use_authority, owner, token_program, ata_program, system_program, rent, use_authority_record, burner, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let metadata = accounts.get(0)?;
+        let token_account = accounts.get(1)?;
+        let mint = accounts.get(2)?;
+        let use_authority = accounts.get(3)?;
+        let owner = accounts.get(4)?;
+        let token_program = accounts.get(5)?;
+        let ata_program = accounts.get(6)?;
+        let system_program = accounts.get(7)?;
+        let rent = accounts.get(8)?;
+        let use_authority_record = accounts.get(9)?;
+        let burner = accounts.get(10)?;
 
         Some(UtilizeInstructionAccounts {
             metadata: metadata.pubkey,

@@ -6,5 +6,4 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub enum PairType {
     Permissionless,
     Permission,
-    CustomizablePermissionless,
 }

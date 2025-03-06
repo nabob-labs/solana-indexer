@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -17,12 +16,12 @@ pub struct SetRewardAuthorityInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for SetRewardAuthority {
     type ArrangedAccounts = SetRewardAuthorityInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [whirlpool, reward_authority, new_reward_authority, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let whirlpool = accounts.get(0)?;
+        let reward_authority = accounts.get(1)?;
+        let new_reward_authority = accounts.get(2)?;
 
         Some(SetRewardAuthorityInstructionAccounts {
             whirlpool: whirlpool.pubkey,

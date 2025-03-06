@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -17,14 +16,14 @@ pub struct UpdateFeesAndRewardsInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for UpdateFeesAndRewards {
     type ArrangedAccounts = UpdateFeesAndRewardsInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [position, lb_pair, bin_array_lower, bin_array_upper, owner, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let position = accounts.get(0)?;
+        let lb_pair = accounts.get(1)?;
+        let bin_array_lower = accounts.get(2)?;
+        let bin_array_upper = accounts.get(3)?;
+        let owner = accounts.get(4)?;
 
         Some(UpdateFeesAndRewardsInstructionAccounts {
             position: position.pubkey,

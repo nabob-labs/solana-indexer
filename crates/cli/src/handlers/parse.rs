@@ -1,25 +1,24 @@
-use {
-    crate::{
-        accounts::{
-            legacy_process_accounts, process_accounts, AccountsModTemplate, AccountsStructTemplate,
-        },
-        events::{legacy_process_events, process_events, EventsStructTemplate},
-        instructions::{
-            legacy_process_instructions, process_instructions, InstructionsModTemplate,
-            InstructionsStructTemplate,
-        },
-        types::{legacy_process_types, process_types, TypeStructTemplate},
-        util::{is_big_array, legacy_read_idl, read_idl},
+use crate::{
+    accounts::{
+        legacy_process_accounts, process_accounts, AccountsModTemplate, AccountsStructTemplate,
     },
-    anyhow::{bail, Result},
-    askama::Template,
-    heck::{ToKebabCase, ToSnakeCase, ToSnekCase, ToUpperCamelCase},
-    std::fs::{self},
+    commands::ParseOptions,
+    events::{legacy_process_events, process_events, EventsStructTemplate},
+    instructions::{
+        legacy_process_instructions, process_instructions, InstructionsModTemplate,
+        InstructionsStructTemplate,
+    },
+    types::{legacy_process_types, process_types, TypeStructTemplate},
+    util::{is_big_array, legacy_read_idl, read_idl},
 };
+use anyhow::{bail, Result};
+use askama::Template;
+use heck::{ToKebabCase, ToSnakeCase, ToSnekCase, ToUpperCamelCase};
+use std::fs::{self};
 
-pub fn parse(path: String, output: String, as_crate: bool) -> Result<()> {
+pub fn parse(options: ParseOptions) -> Result<()> {
     let (accounts_data, instructions_data, types_data, events_data, program_name) =
-        match read_idl(&path) {
+        match read_idl(&options.idl) {
             Ok(idl) => {
                 let accounts_data = process_accounts(&idl);
                 let instructions_data = process_instructions(&idl);
@@ -35,7 +34,7 @@ pub fn parse(path: String, output: String, as_crate: bool) -> Result<()> {
                     program_name,
                 )
             }
-            Err(_legacy_idl_err) => match legacy_read_idl(&path) {
+            Err(_legacy_idl_err) => match legacy_read_idl(&options.idl) {
                 Ok(idl) => {
                     let accounts_data = legacy_process_accounts(&idl);
                     let instructions_data = legacy_process_instructions(&idl);
@@ -62,21 +61,23 @@ pub fn parse(path: String, output: String, as_crate: bool) -> Result<()> {
     let program_struct_name = format!("{}Account", program_name.to_upper_camel_case());
     let program_instruction_enum = format!("{}Instruction", program_name.to_upper_camel_case());
 
-    let crate_dir = if output.ends_with("/") {
-        if as_crate {
-            format!("{}{}-decoder", output, decoder_name_kebab)
+    let crate_dir = if options.output.ends_with("/") {
+        if options.as_crate {
+            format!("{}{}-decoder", options.output, decoder_name_kebab)
         } else {
-            format!("{}{}_decoder", output, program_name.to_snek_case())
+            format!("{}{}_decoder", options.output, program_name.to_snek_case())
         }
-    } else if as_crate {
-        format!("{}/{}-decoder", output, decoder_name_kebab)
     } else {
-        format!("{}/{}_decoder", output, program_name.to_snek_case())
+        if options.as_crate {
+            format!("{}/{}-decoder", options.output, decoder_name_kebab)
+        } else {
+            format!("{}/{}_decoder", options.output, program_name.to_snek_case())
+        }
     };
 
     fs::create_dir_all(&crate_dir).expect("Failed to create decoder directory");
 
-    let src_dir = if as_crate {
+    let src_dir = if options.as_crate {
         format!("{}/src", crate_dir)
     } else {
         crate_dir.clone()
@@ -184,7 +185,7 @@ pub fn parse(path: String, output: String, as_crate: bool) -> Result<()> {
 
     println!("Generated {}", instructions_mod_filename);
 
-    if as_crate {
+    if options.as_crate {
         let lib_rs_content = format!(
             "pub struct {decoder_name};\npub mod accounts;\npub mod instructions;\npub mod types;",
             decoder_name = decoder_name
@@ -197,7 +198,7 @@ pub fn parse(path: String, output: String, as_crate: bool) -> Result<()> {
             r#"[package]
 name = "{decoder_name_kebab}-decoder"
 version = "0.1.4"
-edition = {{ workspace = true }}
+edition = "2018"
 
 [lib]
 crate-type = ["rlib"]
@@ -206,13 +207,13 @@ crate-type = ["rlib"]
 solana-indexer-core = {{ workspace = true }}
 solana-indexer-proc-macros = {{ workspace = true }}
 solana-indexer-macros = {{ workspace = true }}
-solana-sdk = {{ workspace = true }}
-serde = {{ workspace = true }}
+solana-sdk = "2.0.10"
+serde = "1.0.136"
 {big_array}
 "#,
             decoder_name_kebab = decoder_name_kebab,
             big_array = if needs_big_array {
-                "serde-big-array = { workspace = true }"
+                "serde-big-array = \"0.5.1\""
             } else {
                 ""
             }

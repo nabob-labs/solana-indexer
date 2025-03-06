@@ -1,14 +1,12 @@
-use {
-    async_trait::async_trait,
-    metrics::{counter, gauge, histogram},
-    metrics_exporter_prometheus::PrometheusBuilder,
-    solana_indexer_core::{
-        error::{Error, IndexerResult},
-        metrics::Metrics,
-    },
-    std::{collections::HashMap, net::SocketAddrV4, sync::Once},
-    tokio::sync::RwLock,
-};
+use async_trait::async_trait;
+use metrics::{counter, gauge, histogram};
+use metrics_exporter_prometheus::PrometheusBuilder;
+use solana_indexer_core::error::{Error, IndexerResult};
+use solana_indexer_core::metrics::Metrics;
+use std::collections::HashMap;
+use std::net::SocketAddrV4;
+use std::sync::Once;
+use tokio::sync::RwLock;
 
 pub struct PrometheusMetrics {
     pub counters: RwLock<HashMap<String, metrics::Counter>>,
@@ -16,18 +14,13 @@ pub struct PrometheusMetrics {
     pub histograms: RwLock<HashMap<String, metrics::Histogram>>,
 }
 
-impl Default for PrometheusMetrics {
-    fn default() -> Self {
+impl PrometheusMetrics {
+    pub fn new() -> Self {
         Self {
             counters: RwLock::new(HashMap::new()),
             gauges: RwLock::new(HashMap::new()),
             histograms: RwLock::new(HashMap::new()),
         }
-    }
-}
-impl PrometheusMetrics {
-    pub fn new() -> Self {
-        Self::default()
     }
 }
 

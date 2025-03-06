@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x2477fb8122f00793")]
-pub struct RequestElevationGroup {
+pub struct RequestElevationGroup{
     pub elevation_group: u8,
 }
 
@@ -17,12 +18,10 @@ pub struct RequestElevationGroupInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for RequestElevationGroup {
     type ArrangedAccounts = RequestElevationGroupInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [owner, obligation, lending_market, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let owner = accounts.get(0)?;
+        let obligation = accounts.get(1)?;
+        let lending_market = accounts.get(2)?;
 
         Some(RequestElevationGroupInstructionAccounts {
             owner: owner.pubkey,

@@ -1,5 +1,3 @@
-use crate::PROGRAM_ID;
-
 use super::OrcaWhirlpoolDecoder;
 pub mod close_bundled_position;
 pub mod close_position;
@@ -115,17 +113,13 @@ pub enum OrcaWhirlpoolInstruction {
     DeleteTokenBadge(delete_token_badge::DeleteTokenBadge),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for OrcaWhirlpoolDecoder {
+impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for OrcaWhirlpoolDecoder {
     type InstructionType = OrcaWhirlpoolInstruction;
 
     fn decode_instruction(
         &self,
         instruction: &solana_sdk::instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
-        if !instruction.program_id.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         solana_indexer_core::try_decode_instructions!(instruction,
             OrcaWhirlpoolInstruction::InitializeConfig => initialize_config::InitializeConfig,
             OrcaWhirlpoolInstruction::InitializePool => initialize_pool::InitializePool,

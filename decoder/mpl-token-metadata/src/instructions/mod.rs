@@ -1,5 +1,3 @@
-use crate::PROGRAM_ID;
-
 use super::TokenMetadataDecoder;
 pub mod _use;
 pub mod approve_collection_authority;
@@ -131,17 +129,13 @@ pub enum TokenMetadataInstruction {
     CloseAccounts(close_accounts::CloseAccounts),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for TokenMetadataDecoder {
+impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for TokenMetadataDecoder {
     type InstructionType = TokenMetadataInstruction;
 
     fn decode_instruction(
         &self,
         instruction: &solana_sdk::instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
-        if !instruction.program_id.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         solana_indexer_core::try_decode_instructions!(instruction,
             TokenMetadataInstruction::CreateMetadataAccount => create_metadata_account::CreateMetadataAccount,
             TokenMetadataInstruction::UpdateMetadataAccount => update_metadata_account::UpdateMetadataAccount,

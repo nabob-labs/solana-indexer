@@ -10,7 +10,6 @@ pub struct TransferChecked {
 
 pub struct TransferCheckedAccounts {
     pub source: solana_sdk::pubkey::Pubkey,
-    pub mint: solana_sdk::pubkey::Pubkey,
     pub destination: solana_sdk::pubkey::Pubkey,
     pub authority: solana_sdk::pubkey::Pubkey,
     pub remaining_accounts: Vec<solana_sdk::instruction::AccountMeta>,
@@ -19,19 +18,18 @@ pub struct TransferCheckedAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for TransferChecked {
     type ArrangedAccounts = TransferCheckedAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [source, mint, destination, authority, remaining_accounts @ ..] = accounts else {
-            return None;
-        };
+        let source = accounts.get(0)?;
+        let destination = accounts.get(1)?;
+        let authority = accounts.get(2)?;
 
         Some(TransferCheckedAccounts {
             source: source.pubkey,
-            mint: mint.pubkey,
             destination: destination.pubkey,
             authority: authority.pubkey,
-            remaining_accounts: remaining_accounts.to_vec(),
+            remaining_accounts: accounts.get(3..).unwrap_or_default().to_vec(),
         })
     }
 }

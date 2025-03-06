@@ -1,5 +1,3 @@
-use crate::PROGRAM_ID;
-
 use super::KaminoVaultDecoder;
 pub mod deposit;
 pub mod give_up_pending_fees;
@@ -39,17 +37,13 @@ pub enum KaminoVaultInstruction {
     WithdrawFromAvailable(withdraw_from_available::WithdrawFromAvailable),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for KaminoVaultDecoder {
+impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for KaminoVaultDecoder {
     type InstructionType = KaminoVaultInstruction;
 
     fn decode_instruction(
         &self,
         instruction: &solana_sdk::instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
-        if !instruction.program_id.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         solana_indexer_core::try_decode_instructions!(instruction,
             KaminoVaultInstruction::InitVault => init_vault::InitVault,
             KaminoVaultInstruction::UpdateReserveAllocation => update_reserve_allocation::UpdateReserveAllocation,

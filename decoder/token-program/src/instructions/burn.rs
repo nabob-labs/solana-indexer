@@ -17,18 +17,18 @@ pub struct BurnAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Burn {
     type ArrangedAccounts = BurnAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [account, mint, owner, remaining_accounts @ ..] = accounts else {
-            return None;
-        };
+        let account = accounts.get(0)?;
+        let mint = accounts.get(1)?;
+        let owner = accounts.get(2)?;
 
         Some(BurnAccounts {
             account: account.pubkey,
             mint: mint.pubkey,
             owner: owner.pubkey,
-            remaining_accounts: remaining_accounts.to_vec(),
+            remaining_accounts: accounts.get(3..).unwrap_or_default().to_vec(),
         })
     }
 }

@@ -1,13 +1,11 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use solana_indexer_core::{borsh, IndexerDeserialize};
+use super::super::types::*;
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0xf02f99440dbee12a")]
-pub struct PreFlashFillOrder {
+pub struct PreFlashFillOrder{
     pub params: PreFlashFillOrderParams,
 }
 
@@ -24,14 +22,14 @@ pub struct PreFlashFillOrderInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for PreFlashFillOrder {
     type ArrangedAccounts = PreFlashFillOrderInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [taker, order, input_mint_reserve, taker_input_mint_account, input_mint, input_token_program, instruction, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let taker = accounts.get(0)?;
+        let order = accounts.get(1)?;
+        let input_mint_reserve = accounts.get(2)?;
+        let taker_input_mint_account = accounts.get(3)?;
+        let input_mint = accounts.get(4)?;
+        let input_token_program = accounts.get(5)?;
+        let instruction = accounts.get(6)?;
 
         Some(PreFlashFillOrderInstructionAccounts {
             taker: taker.pubkey,

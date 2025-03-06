@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -18,14 +17,15 @@ pub struct CreateOpenOrdersInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CreateOpenOrders {
     type ArrangedAccounts = CreateOpenOrdersInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [open_orders, payer, dex_program, system_program, rent, market, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let open_orders = accounts.get(0)?;
+        let payer = accounts.get(1)?;
+        let dex_program = accounts.get(2)?;
+        let system_program = accounts.get(3)?;
+        let rent = accounts.get(4)?;
+        let market = accounts.get(5)?;
 
         Some(CreateOpenOrdersInstructionAccounts {
             open_orders: open_orders.pubkey,

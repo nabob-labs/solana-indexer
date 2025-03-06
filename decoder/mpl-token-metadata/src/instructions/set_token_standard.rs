@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x23")]
-pub struct SetTokenStandard {}
+pub struct SetTokenStandard{
+}
 
 pub struct SetTokenStandardInstructionAccounts {
     pub metadata: solana_sdk::pubkey::Pubkey,
@@ -16,12 +18,11 @@ pub struct SetTokenStandardInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for SetTokenStandard {
     type ArrangedAccounts = SetTokenStandardInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [metadata, update_authority, mint, edition, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let metadata = accounts.get(0)?;
+        let update_authority = accounts.get(1)?;
+        let mint = accounts.get(2)?;
+        let edition = accounts.get(3)?;
 
         Some(SetTokenStandardInstructionAccounts {
             metadata: metadata.pubkey,

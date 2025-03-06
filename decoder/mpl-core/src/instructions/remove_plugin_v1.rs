@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x04")]
-pub struct RemovePluginV1 {
+pub struct RemovePluginV1{
     pub remove_plugin_v1_args: RemovePluginV1Args,
 }
 
@@ -23,14 +22,13 @@ pub struct RemovePluginV1InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for RemovePluginV1 {
     type ArrangedAccounts = RemovePluginV1InstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [asset, collection, payer, authority, system_program, log_wrapper, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let asset = accounts.get(0)?;
+        let collection = accounts.get(1)?;
+        let payer = accounts.get(2)?;
+        let authority = accounts.get(3)?;
+        let system_program = accounts.get(4)?;
+        let log_wrapper = accounts.get(5)?;
 
         Some(RemovePluginV1InstructionAccounts {
             asset: asset.pubkey,

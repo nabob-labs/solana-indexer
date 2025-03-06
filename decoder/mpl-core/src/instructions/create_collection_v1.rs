@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x01")]
-pub struct CreateCollectionV1 {
+pub struct CreateCollectionV1{
     pub create_collection_v1_args: CreateCollectionV1Args,
 }
 
@@ -21,13 +20,11 @@ pub struct CreateCollectionV1InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CreateCollectionV1 {
     type ArrangedAccounts = CreateCollectionV1InstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [collection, update_authority, payer, system_program, _remaining @ ..] = accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let collection = accounts.get(0)?;
+        let update_authority = accounts.get(1)?;
+        let payer = accounts.get(2)?;
+        let system_program = accounts.get(3)?;
 
         Some(CreateCollectionV1InstructionAccounts {
             collection: collection.pubkey,

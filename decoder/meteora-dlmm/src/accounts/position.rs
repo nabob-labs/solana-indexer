@@ -1,21 +1,22 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
+ 
+use solana_indexer_core::{borsh, IndexerDeserialize};
+use super::super::types::*;
 
 #[derive(IndexerDeserialize, Debug)]
+ 
+
 #[indexer(discriminator = "0xaabc8fe47a40f7d0")]
-pub struct Position {
-    pub lb_pair: solana_sdk::pubkey::Pubkey,
-    pub owner: solana_sdk::pubkey::Pubkey,
-    pub liquidity_shares: [u64; 70],
-    pub reward_infos: [UserRewardInfo; 70],
-    pub fee_infos: [FeeInfo; 70],
-    pub lower_bin_id: i32,
-    pub upper_bin_id: i32,
-    pub last_updated_at: i64,
-    pub total_claimed_fee_x_amount: u64,
-    pub total_claimed_fee_y_amount: u64,
-    pub total_claimed_rewards: [u64; 2],
-    pub reserved: [u8; 160],
+pub struct Position { 
+        pub lb_pair: solana_sdk::pubkey::Pubkey, 
+        pub owner: solana_sdk::pubkey::Pubkey, 
+        pub liquidity_shares: [u64; 70], 
+        pub reward_infos: [UserRewardInfo; 70], 
+        pub fee_infos: [FeeInfo; 70], 
+        pub lower_bin_id: i32, 
+        pub upper_bin_id: i32, 
+        pub last_updated_at: i64, 
+        pub total_claimed_fee_x_amount: u64, 
+        pub total_claimed_fee_y_amount: u64, 
+        pub total_claimed_rewards: [u64; 2], 
+        pub reserved: [u8; 160], 
 }

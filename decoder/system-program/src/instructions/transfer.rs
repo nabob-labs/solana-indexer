@@ -15,12 +15,11 @@ pub struct TransferAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Transfer {
     type ArrangedAccounts = TransferAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [funding_account, recipient_account, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let funding_account = accounts.get(0)?;
+        let recipient_account = accounts.get(1)?;
 
         Some(TransferAccounts {
             from: funding_account.pubkey,

@@ -39,17 +39,13 @@ pub enum SystemProgramInstruction {
     UpgradeNonceAccount(upgrade_nonce_account::UpgradeNonceAccount),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for SystemProgramDecoder {
+impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for SystemProgramDecoder {
     type InstructionType = SystemProgramInstruction;
 
     fn decode_instruction(
         &self,
         instruction: &solana_sdk::instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
-        if !instruction.program_id.eq(&solana_sdk::system_program::id()) {
-            return None;
-        }
-
         solana_indexer_core::try_decode_instructions!(instruction,
             SystemProgramInstruction::CreateAccount => create_account::CreateAccount,
             SystemProgramInstruction::Assign => assign::Assign,

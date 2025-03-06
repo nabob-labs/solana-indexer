@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -24,14 +23,21 @@ pub struct InitializePositionBundleWithMetadataInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializePositionBundleWithMetadata {
     type ArrangedAccounts = InitializePositionBundleWithMetadataInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [position_bundle, position_bundle_mint, position_bundle_metadata, position_bundle_token_account, position_bundle_owner, funder, metadata_update_auth, token_program, system_program, rent, associated_token_program, metadata_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let position_bundle = accounts.get(0)?;
+        let position_bundle_mint = accounts.get(1)?;
+        let position_bundle_metadata = accounts.get(2)?;
+        let position_bundle_token_account = accounts.get(3)?;
+        let position_bundle_owner = accounts.get(4)?;
+        let funder = accounts.get(5)?;
+        let metadata_update_auth = accounts.get(6)?;
+        let token_program = accounts.get(7)?;
+        let system_program = accounts.get(8)?;
+        let rent = accounts.get(9)?;
+        let associated_token_program = accounts.get(10)?;
+        let metadata_program = accounts.get(11)?;
 
         Some(InitializePositionBundleWithMetadataInstructionAccounts {
             position_bundle: position_bundle.pubkey,

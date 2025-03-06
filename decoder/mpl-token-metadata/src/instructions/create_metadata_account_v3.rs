@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x21")]
-pub struct CreateMetadataAccountV3 {
+pub struct CreateMetadataAccountV3{
     pub create_metadata_account_args_v3: CreateMetadataAccountArgsV3,
 }
 
@@ -24,14 +23,14 @@ pub struct CreateMetadataAccountV3InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CreateMetadataAccountV3 {
     type ArrangedAccounts = CreateMetadataAccountV3InstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [metadata, mint, mint_authority, payer, update_authority, system_program, rent, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let metadata = accounts.get(0)?;
+        let mint = accounts.get(1)?;
+        let mint_authority = accounts.get(2)?;
+        let payer = accounts.get(3)?;
+        let update_authority = accounts.get(4)?;
+        let system_program = accounts.get(5)?;
+        let rent = accounts.get(6)?;
 
         Some(CreateMetadataAccountV3InstructionAccounts {
             metadata: metadata.pubkey,

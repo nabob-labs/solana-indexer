@@ -1,14 +1,12 @@
-use {
-    crate::{
-        events::EventData,
-        idl::Idl,
-        legacy_idl::{LegacyIdl, LegacyIdlInstructionDiscriminant},
-        util::idl_type_to_rust_type,
-    },
-    askama::Template,
-    heck::{ToSnekCase, ToUpperCamelCase},
-    sha2::{Digest, Sha256},
+use crate::{
+    events::EventData,
+    idl::Idl,
+    legacy_idl::{LegacyIdl, LegacyIdlInstructionDiscriminant},
+    util::idl_type_to_rust_type,
 };
+use askama::Template;
+use heck::{ToSnekCase, ToUpperCamelCase};
+use sha2::{Digest, Sha256};
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -149,7 +147,8 @@ fn legacy_compute_instruction_discriminator(
     option_discriminant: Option<&LegacyIdlInstructionDiscriminant>,
 ) -> String {
     if let Some(discriminant) = option_discriminant {
-        format!("0x{}", hex::encode(discriminant.value.to_be_bytes()))
+        let disc = format!("0x{}", hex::encode(discriminant.value.to_be_bytes()));
+        return disc;
     } else {
         let mut hasher = Sha256::new();
         let discriminator_input = format!("global:{}", instruction_name);

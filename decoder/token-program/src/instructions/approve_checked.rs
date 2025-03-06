@@ -19,19 +19,20 @@ pub struct ApproveCheckedAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for ApproveChecked {
     type ArrangedAccounts = ApproveCheckedAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [source, mint, delegate, owner, remaining_accounts @ ..] = accounts else {
-            return None;
-        };
+        let source = accounts.get(0)?;
+        let mint = accounts.get(1)?;
+        let delegate = accounts.get(2)?;
+        let owner = accounts.get(3)?;
 
         Some(ApproveCheckedAccounts {
             source: source.pubkey,
             mint: mint.pubkey,
             delegate: delegate.pubkey,
             owner: owner.pubkey,
-            remaining_accounts: remaining_accounts.to_vec(),
+            remaining_accounts: accounts.get(4..).unwrap_or_default().to_vec(),
         })
     }
 }

@@ -1,5 +1,3 @@
-use crate::PROGRAM_ID;
-
 use super::RaydiumAmmV4Decoder;
 pub mod admin_cancel_orders;
 pub mod create_config_account;
@@ -47,17 +45,13 @@ pub enum RaydiumAmmV4Instruction {
     UpdateConfigAccount(update_config_account::UpdateConfigAccount),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for RaydiumAmmV4Decoder {
+impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for RaydiumAmmV4Decoder {
     type InstructionType = RaydiumAmmV4Instruction;
 
     fn decode_instruction(
         &self,
         instruction: &solana_sdk::instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
-        if !instruction.program_id.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         solana_indexer_core::try_decode_instructions!(instruction,
             RaydiumAmmV4Instruction::Initialize => initialize::Initialize,
             RaydiumAmmV4Instruction::Initialize2 => initialize2::Initialize2,

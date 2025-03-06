@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x8250269950d4b6fd")]
-pub struct IdlMissingTypes {
+pub struct IdlMissingTypes{
     pub reserve_farm_kind: ReserveFarmKind,
     pub asset_tier: AssetTier,
     pub fee_calculation: FeeCalculation,
@@ -26,12 +25,10 @@ pub struct IdlMissingTypesInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for IdlMissingTypes {
     type ArrangedAccounts = IdlMissingTypesInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [lending_market_owner, lending_market, reserve, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let lending_market_owner = accounts.get(0)?;
+        let lending_market = accounts.get(1)?;
+        let reserve = accounts.get(2)?;
 
         Some(IdlMissingTypesInstructionAccounts {
             lending_market_owner: lending_market_owner.pubkey,

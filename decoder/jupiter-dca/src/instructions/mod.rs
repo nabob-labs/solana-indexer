@@ -1,23 +1,19 @@
-use crate::PROGRAM_ID;
-
 use super::JupiterDcaDecoder;
 pub mod close_dca;
-pub mod closed_event;
-pub mod collected_fee_event;
+pub mod closed;
+pub mod collected_fee;
 pub mod deposit;
-pub mod deposit_event;
 pub mod end_and_close;
-pub mod filled_event;
+pub mod filled;
 pub mod fulfill_dlmm_fill;
 pub mod fulfill_flash_fill;
 pub mod initiate_dlmm_fill;
 pub mod initiate_flash_fill;
 pub mod open_dca;
 pub mod open_dca_v2;
-pub mod opened_event;
+pub mod opened;
 pub mod transfer;
 pub mod withdraw;
-pub mod withdraw_event;
 pub mod withdraw_fees;
 
 #[derive(
@@ -43,25 +39,19 @@ pub enum JupiterDcaInstruction {
     FulfillDlmmFill(fulfill_dlmm_fill::FulfillDlmmFill),
     Transfer(transfer::Transfer),
     EndAndClose(end_and_close::EndAndClose),
-    CollectedFeeEvent(collected_fee_event::CollectedFeeEvent),
-    FilledEvent(filled_event::FilledEvent),
-    OpenedEvent(opened_event::OpenedEvent),
-    ClosedEvent(closed_event::ClosedEvent),
-    WithdrawEvent(withdraw_event::WithdrawEvent),
-    DepositEvent(deposit_event::DepositEvent),
+    CollectedFee(collected_fee::CollectedFee),
+    Filled(filled::Filled),
+    Opened(opened::Opened),
+    Closed(closed::Closed),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for JupiterDcaDecoder {
+impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for JupiterDcaDecoder {
     type InstructionType = JupiterDcaInstruction;
 
     fn decode_instruction(
         &self,
         instruction: &solana_sdk::instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
-        if !instruction.program_id.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         solana_indexer_core::try_decode_instructions!(instruction,
             JupiterDcaInstruction::OpenDca => open_dca::OpenDca,
             JupiterDcaInstruction::OpenDcaV2 => open_dca_v2::OpenDcaV2,
@@ -75,12 +65,10 @@ impl solana_indexer_core::instruction::InstructionDecoder<'_> for JupiterDcaDeco
             JupiterDcaInstruction::FulfillDlmmFill => fulfill_dlmm_fill::FulfillDlmmFill,
             JupiterDcaInstruction::Transfer => transfer::Transfer,
             JupiterDcaInstruction::EndAndClose => end_and_close::EndAndClose,
-            JupiterDcaInstruction::CollectedFeeEvent => collected_fee_event::CollectedFeeEvent,
-            JupiterDcaInstruction::FilledEvent => filled_event::FilledEvent,
-            JupiterDcaInstruction::OpenedEvent => opened_event::OpenedEvent,
-            JupiterDcaInstruction::ClosedEvent => closed_event::ClosedEvent,
-            JupiterDcaInstruction::WithdrawEvent => withdraw_event::WithdrawEvent,
-            JupiterDcaInstruction::DepositEvent => deposit_event::DepositEvent,
+            JupiterDcaInstruction::CollectedFee => collected_fee::CollectedFee,
+            JupiterDcaInstruction::Filled => filled::Filled,
+            JupiterDcaInstruction::Opened => opened::Opened,
+            JupiterDcaInstruction::Closed => closed::Closed,
         )
     }
 }

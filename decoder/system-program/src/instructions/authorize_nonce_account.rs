@@ -13,12 +13,11 @@ pub struct AuthorizeNonceAccountAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for AuthorizeNonceAccount {
     type ArrangedAccounts = AuthorizeNonceAccountAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [nonce_account, nonce_authority, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let nonce_account = accounts.get(0)?;
+        let nonce_authority = accounts.get(1)?;
 
         Some(AuthorizeNonceAccountAccounts {
             nonce_account: nonce_account.pubkey,

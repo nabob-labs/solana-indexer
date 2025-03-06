@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -15,14 +14,12 @@ pub struct SetRewardEmissionsSuperAuthorityInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for SetRewardEmissionsSuperAuthority {
     type ArrangedAccounts = SetRewardEmissionsSuperAuthorityInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [whirlpools_config, reward_emissions_super_authority, new_reward_emissions_super_authority, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let whirlpools_config = accounts.get(0)?;
+        let reward_emissions_super_authority = accounts.get(1)?;
+        let new_reward_emissions_super_authority = accounts.get(2)?;
 
         Some(SetRewardEmissionsSuperAuthorityInstructionAccounts {
             whirlpools_config: whirlpools_config.pubkey,

@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x25")]
-pub struct BurnEditionNft {}
+pub struct BurnEditionNft{
+}
 
 pub struct BurnEditionNftInstructionAccounts {
     pub metadata: solana_sdk::pubkey::Pubkey,
@@ -22,14 +24,17 @@ pub struct BurnEditionNftInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for BurnEditionNft {
     type ArrangedAccounts = BurnEditionNftInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [metadata, owner, print_edition_mint, master_edition_mint, print_edition_token_account, master_edition_token_account, master_edition_account, print_edition_account, edition_marker_account, spl_token_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let metadata = accounts.get(0)?;
+        let owner = accounts.get(1)?;
+        let print_edition_mint = accounts.get(2)?;
+        let master_edition_mint = accounts.get(3)?;
+        let print_edition_token_account = accounts.get(4)?;
+        let master_edition_token_account = accounts.get(5)?;
+        let master_edition_account = accounts.get(6)?;
+        let print_edition_account = accounts.get(7)?;
+        let edition_marker_account = accounts.get(8)?;
+        let spl_token_program = accounts.get(9)?;
 
         Some(BurnEditionNftInstructionAccounts {
             metadata: metadata.pubkey,

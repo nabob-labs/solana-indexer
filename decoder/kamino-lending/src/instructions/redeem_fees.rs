@@ -1,10 +1,12 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0xd727b429ad2ef8dc")]
-pub struct RedeemFees {}
+pub struct RedeemFees{
+}
 
 pub struct RedeemFeesInstructionAccounts {
     pub reserve: solana_sdk::pubkey::Pubkey,
@@ -19,14 +21,14 @@ pub struct RedeemFeesInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for RedeemFees {
     type ArrangedAccounts = RedeemFeesInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [reserve, reserve_liquidity_mint, reserve_liquidity_fee_receiver, reserve_supply_liquidity, lending_market, lending_market_authority, token_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let reserve = accounts.get(0)?;
+        let reserve_liquidity_mint = accounts.get(1)?;
+        let reserve_liquidity_fee_receiver = accounts.get(2)?;
+        let reserve_supply_liquidity = accounts.get(3)?;
+        let lending_market = accounts.get(4)?;
+        let lending_market_authority = accounts.get(5)?;
+        let token_program = accounts.get(6)?;
 
         Some(RedeemFeesInstructionAccounts {
             reserve: reserve.pubkey,

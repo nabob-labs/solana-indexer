@@ -1,7 +1,5 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
+use super::super::types::*;
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
@@ -31,14 +29,23 @@ pub struct InitializePermissionLbPairInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializePermissionLbPair {
     type ArrangedAccounts = InitializePermissionLbPairInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [base, lb_pair, bin_array_bitmap_extension, token_mint_x, token_mint_y, reserve_x, reserve_y, oracle, admin, token_program, system_program, rent, event_authority, program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let base = accounts.get(0)?;
+        let lb_pair = accounts.get(1)?;
+        let bin_array_bitmap_extension = accounts.get(2)?;
+        let token_mint_x = accounts.get(3)?;
+        let token_mint_y = accounts.get(4)?;
+        let reserve_x = accounts.get(5)?;
+        let reserve_y = accounts.get(6)?;
+        let oracle = accounts.get(7)?;
+        let admin = accounts.get(8)?;
+        let token_program = accounts.get(9)?;
+        let system_program = accounts.get(10)?;
+        let rent = accounts.get(11)?;
+        let event_authority = accounts.get(12)?;
+        let program = accounts.get(13)?;
 
         Some(InitializePermissionLbPairInstructionAccounts {
             base: base.pubkey,

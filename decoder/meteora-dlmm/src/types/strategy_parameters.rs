@@ -1,11 +1,9 @@
-use {
-    super::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::*;
+use solana_indexer_core::{borsh, IndexerDeserialize};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 pub struct StrategyParameters {
     pub min_bin_id: i32,
     pub max_bin_id: i32,
@@ -13,3 +11,4 @@ pub struct StrategyParameters {
     #[serde(with = "BigArray")]
     pub parameteres: [u8; 64],
 }
+

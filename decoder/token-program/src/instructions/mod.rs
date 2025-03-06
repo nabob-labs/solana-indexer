@@ -64,17 +64,13 @@ pub enum TokenProgramInstruction {
     UiAmountToAmount(ui_amount_to_amount::UiAmountToAmount),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for TokenProgramDecoder {
+impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for TokenProgramDecoder {
     type InstructionType = TokenProgramInstruction;
 
     fn decode_instruction(
         &self,
         instruction: &solana_sdk::instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
-        if !instruction.program_id.eq(&spl_token::id()) {
-            return None;
-        }
-
         solana_indexer_core::try_decode_instructions!(instruction,
             TokenProgramInstruction::AmountToUiAmount => amount_to_ui_amount::AmountToUiAmount,
             TokenProgramInstruction::ApproveChecked => approve_checked::ApproveChecked,

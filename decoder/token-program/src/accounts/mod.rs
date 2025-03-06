@@ -1,8 +1,7 @@
-use {
-    crate::TokenProgramDecoder,
-    solana_indexer_core::account::{AccountDecoder, DecodedAccount},
-    solana_sdk::{account::ReadableAccount, program_pack::Pack},
-};
+use solana_indexer_core::account::{AccountDecoder, DecodedAccount};
+use solana_sdk::{account::ReadableAccount, program_pack::Pack};
+
+use crate::TokenProgramDecoder;
 
 pub enum TokenProgramAccount {
     Account(spl_token::state::Account),
@@ -10,18 +9,18 @@ pub enum TokenProgramAccount {
     Multisig(spl_token::state::Multisig),
 }
 
-impl AccountDecoder<'_> for TokenProgramDecoder {
+impl<'a> AccountDecoder<'a> for TokenProgramDecoder {
     type AccountType = TokenProgramAccount;
 
     fn decode_account(
         &self,
         account: &solana_sdk::account::Account,
     ) -> Option<DecodedAccount<Self::AccountType>> {
-        if !account.owner.eq(&spl_token::id()) {
+        if account.owner() != &spl_token::id() {
             return None;
         }
 
-        if let Ok(data) = spl_token::state::Account::unpack(account.data()) {
+        if let Some(data) = spl_token::state::Account::unpack(account.data()).ok() {
             return Some(DecodedAccount {
                 data: TokenProgramAccount::Account(data),
                 lamports: account.lamports,
@@ -30,7 +29,7 @@ impl AccountDecoder<'_> for TokenProgramDecoder {
                 rent_epoch: account.rent_epoch,
             });
         };
-        if let Ok(data) = spl_token::state::Mint::unpack(account.data()) {
+        if let Some(data) = spl_token::state::Mint::unpack(account.data()).ok() {
             return Some(DecodedAccount {
                 data: TokenProgramAccount::Mint(data),
                 lamports: account.lamports,
@@ -39,7 +38,7 @@ impl AccountDecoder<'_> for TokenProgramDecoder {
                 rent_epoch: account.rent_epoch,
             });
         };
-        if let Ok(data) = spl_token::state::Multisig::unpack(account.data()) {
+        if let Some(data) = spl_token::state::Multisig::unpack(account.data()).ok() {
             return Some(DecodedAccount {
                 data: TokenProgramAccount::Multisig(data),
                 lamports: account.lamports,

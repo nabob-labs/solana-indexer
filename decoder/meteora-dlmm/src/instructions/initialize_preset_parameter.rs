@@ -1,7 +1,5 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
+use super::super::types::*;
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
@@ -21,12 +19,13 @@ pub struct InitializePresetParameterInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializePresetParameter {
     type ArrangedAccounts = InitializePresetParameterInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [preset_parameter, admin, system_program, rent, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let preset_parameter = accounts.get(0)?;
+        let admin = accounts.get(1)?;
+        let system_program = accounts.get(2)?;
+        let rent = accounts.get(3)?;
 
         Some(InitializePresetParameterInstructionAccounts {
             preset_parameter: preset_parameter.pubkey,

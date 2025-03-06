@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x0d")]
-pub struct BurnCollectionV1 {
+pub struct BurnCollectionV1{
     pub burn_collection_v1_args: BurnCollectionV1Args,
 }
 
@@ -21,12 +20,11 @@ pub struct BurnCollectionV1InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for BurnCollectionV1 {
     type ArrangedAccounts = BurnCollectionV1InstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [collection, payer, authority, log_wrapper, _remaining @ ..] = accounts else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let collection = accounts.get(0)?;
+        let payer = accounts.get(1)?;
+        let authority = accounts.get(2)?;
+        let log_wrapper = accounts.get(3)?;
 
         Some(BurnCollectionV1InstructionAccounts {
             collection: collection.pubkey,

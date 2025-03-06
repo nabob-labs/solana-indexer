@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -22,14 +21,17 @@ pub struct PreFlashFillOrderInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for PreFlashFillOrder {
     type ArrangedAccounts = PreFlashFillOrderInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [order, reserve, taker, taker_output_account, input_mint, input_mint_token_program, instruction, system_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let order = accounts.get(0)?;
+        let reserve = accounts.get(1)?;
+        let taker = accounts.get(2)?;
+        let taker_output_account = accounts.get(3)?;
+        let input_mint = accounts.get(4)?;
+        let input_mint_token_program = accounts.get(5)?;
+        let instruction = accounts.get(6)?;
+        let system_program = accounts.get(7)?;
 
         Some(PreFlashFillOrderInstructionAccounts {
             order: order.pubkey,

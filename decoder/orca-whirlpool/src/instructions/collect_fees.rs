@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -21,14 +20,18 @@ pub struct CollectFeesInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CollectFees {
     type ArrangedAccounts = CollectFeesInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [whirlpool, position_authority, position, position_token_account, token_owner_account_a, token_vault_a, token_owner_account_b, token_vault_b, token_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let whirlpool = accounts.get(0)?;
+        let position_authority = accounts.get(1)?;
+        let position = accounts.get(2)?;
+        let position_token_account = accounts.get(3)?;
+        let token_owner_account_a = accounts.get(4)?;
+        let token_vault_a = accounts.get(5)?;
+        let token_owner_account_b = accounts.get(6)?;
+        let token_vault_b = accounts.get(7)?;
+        let token_program = accounts.get(8)?;
 
         Some(CollectFeesInstructionAccounts {
             whirlpool: whirlpool.pubkey,

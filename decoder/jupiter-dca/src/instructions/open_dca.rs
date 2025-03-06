@@ -34,13 +34,20 @@ impl solana_indexer_core::deserialize::ArrangeAccounts for OpenDca {
     type ArrangedAccounts = OpenDcaInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [dca, user, input_mint, output_mint, user_ata, in_ata, out_ata, system_program, token_program, associated_token_program, event_authority, program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let dca = accounts.get(0)?;
+        let user = accounts.get(1)?;
+        let input_mint = accounts.get(2)?;
+        let output_mint = accounts.get(3)?;
+        let user_ata = accounts.get(4)?;
+        let in_ata = accounts.get(5)?;
+        let out_ata = accounts.get(6)?;
+        let system_program = accounts.get(7)?;
+        let token_program = accounts.get(8)?;
+        let associated_token_program = accounts.get(9)?;
+        let event_authority = accounts.get(10)?;
+        let program = accounts.get(11)?;
 
         Some(OpenDcaInstructionAccounts {
             dca: dca.pubkey,

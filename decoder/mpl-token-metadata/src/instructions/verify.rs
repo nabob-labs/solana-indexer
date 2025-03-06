@@ -1,13 +1,12 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x34")]
-pub struct Verify {
+pub struct Verify{
     pub verification_args: VerificationArgs,
 }
 
@@ -25,14 +24,15 @@ pub struct VerifyInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Verify {
     type ArrangedAccounts = VerifyInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [authority, delegate_record, metadata, collection_mint, collection_metadata, collection_master_edition, system_program, sysvar_instructions, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let authority = accounts.get(0)?;
+        let delegate_record = accounts.get(1)?;
+        let metadata = accounts.get(2)?;
+        let collection_mint = accounts.get(3)?;
+        let collection_metadata = accounts.get(4)?;
+        let collection_master_edition = accounts.get(5)?;
+        let system_program = accounts.get(6)?;
+        let sysvar_instructions = accounts.get(7)?;
 
         Some(VerifyInstructionAccounts {
             authority: authority.pubkey,

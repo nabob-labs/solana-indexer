@@ -1,75 +1,101 @@
-//! Provides utility functions to transform transaction data into various
-//! representations within the `indexer-core` framework.
+//! Provides utility functions to transform transaction data into various representations
+//! within the `indexer-core` framework.
 //!
-//! This module includes functions for extracting transaction metadata, parsing
-//! instructions, and nesting instructions based on stack depth. It also offers
-//! transformations for Solana transaction components into suitable formats for
-//! the framework, enabling flexible processing of transaction data.
+//! This module includes functions for extracting transaction metadata, parsing instructions,
+//! and nesting instructions based on stack depth. It also offers transformations for Solana
+//! transaction components into suitable formats for the framework, enabling flexible processing
+//! of transaction data.
 //!
 //! ## Key Components
 //!
-//! - **Metadata Extraction**: Extracts essential transaction metadata for
-//!   processing.
-//! - **Instruction Parsing**: Parses both top-level and nested instructions
-//!   from transactions.
-//! - **Account Metadata**: Converts account data into a standardized format for
-//!   transactions.
+//! - **Metadata Extraction**: Extracts essential transaction metadata for processing.
+//! - **Instruction Parsing**: Parses both top-level and nested instructions from transactions.
+//! - **Account Metadata**: Converts account data into a standardized format for transactions.
 //!
 //! ## Notes
 //!
-//! - The module supports both legacy and v0 transactions, including handling of
-//!   loaded addresses and inner instructions.
+//! - The module supports both legacy and v0 transactions, including handling of loaded
+//!   addresses and inner instructions.
 
-use {
-    crate::{
-        collection::InstructionDecoderCollection,
-        datasource::TransactionUpdate,
-        error::{IndexerResult, Error},
-        instruction::{DecodedInstruction, InstructionMetadata},
-        schema::ParsedInstruction,
-        transaction::TransactionMetadata,
-    },
-    solana_sdk::{
-        instruction::{AccountMeta, CompiledInstruction},
-        message::{
-            v0::{LoadedAddresses, LoadedMessage},
-            VersionedMessage,
-        },
-        pubkey::Pubkey,
-        reserved_account_keys::ReservedAccountKeys,
-        transaction_context::TransactionReturnData,
-    },
-    solana_transaction_status::{
-        option_serializer::OptionSerializer, InnerInstruction, InnerInstructions, Reward,
-        TransactionStatusMeta, TransactionTokenBalance, UiInstruction, UiLoadedAddresses,
-        UiTransactionStatusMeta,
-    },
-    std::{collections::HashSet, str::FromStr},
+use crate::{
+    collection::InstructionDecoderCollection,
+    datasource::TransactionUpdate,
+    error::{IndexerResult, Error},
+    instruction::{DecodedInstruction, InstructionMetadata, NestedInstruction},
+    schema::ParsedInstruction,
+    transaction::TransactionMetadata,
 };
+use solana_sdk::{
+    instruction::{AccountMeta, CompiledInstruction},
+    message::{
+        v0::{LoadedAddresses, LoadedMessage},
+        VersionedMessage,
+    },
+    pubkey::Pubkey,
+    reserved_account_keys::ReservedAccountKeys,
+    transaction_context::TransactionReturnData,
+};
+use solana_transaction_status::{
+    option_serializer::OptionSerializer, InnerInstruction, InnerInstructions, Reward,
+    TransactionStatusMeta, TransactionTokenBalance, UiInstruction, UiLoadedAddresses,
+    UiTransactionStatusMeta,
+};
+use std::{collections::HashSet, str::FromStr};
 
-/// Extracts instructions with metadata from a transaction update.
+/// Extracts the metadata from a transaction update.
 ///
-/// This function parses both top-level and inner instructions, associating them
-/// with metadata such as stack height and account information. It provides a
-/// detailed breakdown of each instruction, useful for further processing.
+/// This function retrieves core metadata such as the transaction's slot, signature, and
+/// fee payer from the transaction's message. It ensures that these details are available
+/// and ready for further processing.
 ///
 /// # Parameters
 ///
-/// - `transaction_metadata`: Metadata about the transaction from which
-///   instructions are extracted.
-/// - `transaction_update`: The `TransactionUpdate` containing the transaction's
-///   data and message.
+/// - `transaction_update`: The `TransactionUpdate` containing the transaction details.
 ///
 /// # Returns
 ///
-/// A `IndexerResult<Vec<(InstructionMetadata,
-/// solana_sdk::instruction::Instruction)>>` containing instructions along with
-/// their associated metadata.
+/// A `IndexerResult<TransactionMetadata>` which includes the slot, signature, fee payer, transaction status metadata and the version transaction message.
 ///
 /// # Errors
 ///
-/// Returns an error if any account metadata required for instruction processing
-/// is missing.
+/// Returns an error if the fee payer cannot be extracted from the transaction's account keys.
+pub fn extract_transaction_metadata(
+    transaction_update: &TransactionUpdate,
+) -> IndexerResult<TransactionMetadata> {
+    log::trace!(
+        "extract_transaction_metadata(transaction_update: {:?})",
+        transaction_update
+    );
+    let accounts = transaction_update.transaction.message.static_account_keys();
+
+    Ok(TransactionMetadata {
+        slot: transaction_update.slot,
+        signature: transaction_update.signature,
+        fee_payer: *accounts.get(0).ok_or(Error::MissingFeePayer)?,
+        meta: transaction_update.meta.clone(),
+        message: transaction_update.transaction.message.clone(),
+    })
+}
+
+/// Extracts instructions with metadata from a transaction update.
+///
+/// This function parses both top-level and inner instructions, associating them with
+/// metadata such as stack height and account information. It provides a detailed
+/// breakdown of each instruction, useful for further processing.
+///
+/// # Parameters
+///
+/// - `transaction_metadata`: Metadata about the transaction from which instructions are extracted.
+/// - `transaction_update`: The `TransactionUpdate` containing the transaction's data and message.
+///
+/// # Returns
+///
+/// A `IndexerResult<Vec<(InstructionMetadata, solana_sdk::instruction::Instruction)>>` containing
+/// instructions along with their associated metadata.
+///
+/// # Errors
+///
+/// Returns an error if any account metadata required for instruction processing is missing.
 pub fn extract_instructions_with_metadata(
     transaction_metadata: &TransactionMetadata,
     transaction_update: &TransactionUpdate,
@@ -134,13 +160,12 @@ pub fn extract_instructions_with_metadata(
                                     .filter_map(|account_index| {
                                         let account_pubkey =
                                             legacy.account_keys.get(*account_index as usize)?;
-
-                                        Some(AccountMeta {
+                                        return Some(AccountMeta {
                                             pubkey: *account_pubkey,
                                             is_writable: legacy
                                                 .is_maybe_writable(*account_index as usize, None),
                                             is_signer: legacy.is_signer(*account_index as usize),
-                                        })
+                                        });
                                     })
                                     .collect();
 
@@ -163,8 +188,18 @@ pub fn extract_instructions_with_metadata(
         }
         VersionedMessage::V0(v0) => {
             let loaded_addresses = LoadedAddresses {
-                writable: meta.loaded_addresses.writable.to_vec(),
-                readonly: meta.loaded_addresses.readonly.to_vec(),
+                writable: meta
+                    .loaded_addresses
+                    .writable
+                    .iter()
+                    .map(|key| key.clone())
+                    .collect(),
+                readonly: meta
+                    .loaded_addresses
+                    .readonly
+                    .iter()
+                    .map(|key| key.clone())
+                    .collect(),
             };
 
             let loaded_message = LoadedMessage::new(
@@ -182,15 +217,15 @@ pub fn extract_instructions_with_metadata(
                 let accounts: Vec<AccountMeta> = compiled_instruction
                     .accounts
                     .iter()
-                    .map(|account_index| {
+                    .filter_map(|account_index| {
                         let account_pubkey =
                             loaded_message.account_keys().get(*account_index as usize);
 
-                        AccountMeta {
-                            pubkey: account_pubkey.copied().unwrap_or_default(),
+                        return Some(AccountMeta {
+                            pubkey: account_pubkey.map(|acc| acc.clone()).unwrap_or_default(),
                             is_writable: loaded_message.is_writable(*account_index as usize),
                             is_signer: loaded_message.is_signer(*account_index as usize),
-                        }
+                        });
                     })
                     .collect();
 
@@ -219,20 +254,19 @@ pub fn extract_instructions_with_metadata(
                                     .instruction
                                     .accounts
                                     .iter()
-                                    .map(|account_index| {
+                                    .filter_map(|account_index| {
                                         let account_pubkey = loaded_message
                                             .account_keys()
                                             .get(*account_index as usize)
-                                            .copied()
+                                            .map(|pubkey| pubkey.clone())
                                             .unwrap_or_default();
-
-                                        AccountMeta {
-                                            pubkey: account_pubkey,
+                                        return Some(AccountMeta {
+                                            pubkey: account_pubkey.clone(),
                                             is_writable: loaded_message
                                                 .is_writable(*account_index as usize),
                                             is_signer: loaded_message
                                                 .is_signer(*account_index as usize),
-                                        }
+                                        });
                                     })
                                     .collect();
 
@@ -258,12 +292,10 @@ pub fn extract_instructions_with_metadata(
     Ok(instructions_with_metadata)
 }
 
-/// Extracts account metadata from a compiled instruction and transaction
-/// message.
+/// Extracts account metadata from a compiled instruction and transaction message.
 ///
-/// This function converts each account index within the instruction into an
-/// `AccountMeta` struct, providing details on account keys, signer status, and
-/// write permissions.
+/// This function converts each account index within the instruction into an `AccountMeta`
+/// struct, providing details on account keys, signer status, and write permissions.
 ///
 /// # Parameters
 ///
@@ -272,13 +304,13 @@ pub fn extract_instructions_with_metadata(
 ///
 /// # Returns
 ///
-/// A `IndexerResult<&[solana_sdk::instruction::AccountMeta]>` containing
-/// metadata for each account involved in the instruction.
+/// A `IndexerResult<Vec<solana_sdk::instruction::AccountMeta>>` containing metadata
+/// for each account involved in the instruction.
 ///
 /// # Errors
 ///
-/// Returns an error if any referenced account key is missing from the
-/// transaction.
+/// Returns an error if any referenced account key is missing from the transaction.
+
 pub fn extract_account_metas(
     compiled_instruction: &solana_sdk::instruction::CompiledInstruction,
     message: &solana_sdk::message::VersionedMessage,
@@ -288,9 +320,7 @@ pub fn extract_account_metas(
         compiled_instruction,
         message
     );
-    let mut accounts = Vec::<solana_sdk::instruction::AccountMeta>::with_capacity(
-        compiled_instruction.accounts.len(),
-    );
+    let mut accounts = Vec::<solana_sdk::instruction::AccountMeta>::new();
 
     for account_index in compiled_instruction.accounts.iter() {
         accounts.push(solana_sdk::instruction::AccountMeta {
@@ -304,8 +334,8 @@ pub fn extract_account_metas(
                 Some(
                     &message
                         .static_account_keys()
-                        .iter()
-                        .copied()
+                        .into_iter()
+                        .map(|pubkey| pubkey.clone())
                         .collect::<HashSet<_>>(),
                 ),
             ),
@@ -315,25 +345,73 @@ pub fn extract_account_metas(
     Ok(accounts)
 }
 
-/// Unnests parsed instructions, producing an array of `(InstructionMetadata,
-/// DecodedInstruction<T>)` tuple
+/// Nests instructions based on stack height, producing a hierarchy of `NestedInstruction`.
 ///
-/// This function takes a vector of `ParsedInstruction` and unnests them into a
-/// vector of `(InstructionMetadata, DecodedInstruction<T>)` tuples.
-/// It recursively processes nested instructions, increasing the stack height
-/// for each level of nesting.
+/// This function organizes instructions into a nested structure, enabling hierarchical
+/// transaction analysis. Instructions are nested according to their stack height,
+/// forming a tree-like structure.
 ///
 /// # Parameters
 ///
-/// - `transaction_metadata`: The metadata of the transaction containing the
-///   instructions.
+/// - `instructions`: A list of tuples containing `InstructionMetadata` and instructions.
+///
+/// # Returns
+///
+/// A vector of `NestedInstruction`, representing the instructions organized by stack depth.
+pub fn nest_instructions(
+    instructions: Vec<(InstructionMetadata, solana_sdk::instruction::Instruction)>,
+) -> Vec<NestedInstruction> {
+    log::trace!("nest_instructions(instructions: {:?})", instructions);
+    let mut result = Vec::<NestedInstruction>::new();
+    let mut stack = Vec::<(Vec<usize>, usize)>::new();
+
+    for (metadata, instruction) in instructions {
+        let nested_instruction = NestedInstruction {
+            metadata: metadata.clone(),
+            instruction,
+            inner_instructions: Vec::new(),
+        };
+
+        while let Some((_, parent_stack_height)) = stack.last() {
+            if metadata.stack_height as usize > *parent_stack_height {
+                break;
+            }
+            stack.pop();
+        }
+
+        if let Some((path_to_parent, _)) = stack.last() {
+            let mut current_instructions = &mut result;
+            for &index in path_to_parent {
+                current_instructions = &mut current_instructions[index].inner_instructions;
+            }
+            current_instructions.push(nested_instruction);
+            let mut new_path = path_to_parent.clone();
+            new_path.push(current_instructions.len() - 1);
+            stack.push((new_path, metadata.stack_height as usize));
+        } else {
+            result.push(nested_instruction);
+            let new_path = vec![result.len() - 1];
+            stack.push((new_path, metadata.stack_height as usize));
+        }
+    }
+
+    result
+}
+
+/// Unnests parsed instructions, producing an array of `(InstructionMetadata, DecodedInstruction<T>)` tuple
+///
+/// This function takes a vector of `ParsedInstruction` and unnests them into a vector of `(InstructionMetadata, DecodedInstruction<T>)` tuples.
+/// It recursively processes nested instructions, increasing the stack height for each level of nesting.
+///
+/// # Parameters
+///
+/// - `transaction_metadata`: The metadata of the transaction containing the instructions.
 /// - `instructions`: The vector of `ParsedInstruction` to be unnested.
 /// - `stack_height`: The current stack height.
 ///
 /// # Returns
 ///
-/// A vector of `(InstructionMetadata, DecodedInstruction<T>)` tuples
-/// representing the unnested instructions.
+/// A vector of `(InstructionMetadata, DecodedInstruction<T>)` tuples representing the unnested instructions.
 pub fn unnest_parsed_instructions<T: InstructionDecoderCollection>(
     transaction_metadata: TransactionMetadata,
     instructions: Vec<ParsedInstruction<T>>,
@@ -356,7 +434,7 @@ pub fn unnest_parsed_instructions<T: InstructionDecoderCollection>(
         ));
         result.extend(unnest_parsed_instructions(
             transaction_metadata.clone(),
-            parsed_instruction.inner_instructions,
+            *parsed_instruction.inner_instructions,
             stack_height + 1,
         ));
     }
@@ -366,9 +444,8 @@ pub fn unnest_parsed_instructions<T: InstructionDecoderCollection>(
 
 /// Converts UI transaction metadata into `TransactionStatusMeta`.
 ///
-/// This function transforms the user interface format of transaction metadata
-/// into a more comprehensive `TransactionStatusMeta` structure suitable for
-/// backend processing.
+/// This function transforms the user interface format of transaction metadata into
+/// a more comprehensive `TransactionStatusMeta` structure suitable for backend processing.
 ///
 /// # Parameters
 ///
@@ -376,14 +453,14 @@ pub fn unnest_parsed_instructions<T: InstructionDecoderCollection>(
 ///
 /// # Returns
 ///
-/// A `IndexerResult<TransactionStatusMeta>` representing the full transaction
-/// status with nested instructions, token balances, and rewards.
+/// A `IndexerResult<TransactionStatusMeta>` representing the full transaction status
+/// with nested instructions, token balances, and rewards.
 ///
 /// # Notes
 ///
-/// This function handles various metadata fields, including inner instructions,
-/// token balances, and rewards, providing a complete view of the transaction's
-/// effects.
+/// This function handles various metadata fields, including inner instructions, token
+/// balances, and rewards, providing a complete view of the transaction's effects.
+
 pub fn transaction_metadata_from_original_meta(
     meta_original: UiTransactionStatusMeta,
 ) -> IndexerResult<TransactionStatusMeta> {
@@ -399,7 +476,7 @@ pub fn transaction_metadata_from_original_meta(
         inner_instructions: Some(
             meta_original
                 .inner_instructions
-                .unwrap_or_else(std::vec::Vec::new)
+                .unwrap_or_else(|| vec![])
                 .iter()
                 .map(|inner_instruction_group| InnerInstructions {
                     index: inner_instruction_group.index,
@@ -437,15 +514,11 @@ pub fn transaction_metadata_from_original_meta(
                 })
                 .collect::<Vec<InnerInstructions>>(),
         ),
-        log_messages: Some(
-            meta_original
-                .log_messages
-                .unwrap_or_else(std::vec::Vec::new),
-        ),
+        log_messages: Some(meta_original.log_messages.unwrap_or_else(|| vec![])),
         pre_token_balances: Some(
             meta_original
                 .pre_token_balances
-                .unwrap_or_else(std::vec::Vec::new)
+                .unwrap_or_else(|| vec![])
                 .iter()
                 .filter_map(|transaction_token_balance| {
                     if let (OptionSerializer::Some(owner), OptionSerializer::Some(program_id)) = (
@@ -468,7 +541,7 @@ pub fn transaction_metadata_from_original_meta(
         post_token_balances: Some(
             meta_original
                 .post_token_balances
-                .unwrap_or_else(std::vec::Vec::new)
+                .unwrap_or_else(|| vec![])
                 .iter()
                 .filter_map(|transaction_token_balance| {
                     if let (OptionSerializer::Some(owner), OptionSerializer::Some(program_id)) = (
@@ -491,7 +564,7 @@ pub fn transaction_metadata_from_original_meta(
         rewards: Some(
             meta_original
                 .rewards
-                .unwrap_or_else(std::vec::Vec::new)
+                .unwrap_or_else(|| vec![])
                 .iter()
                 .map(|rewards| Reward {
                     pubkey: rewards.pubkey.clone(),
@@ -513,12 +586,12 @@ pub fn transaction_metadata_from_original_meta(
                 writable: loaded
                     .writable
                     .iter()
-                    .map(|w| Pubkey::from_str(w).unwrap_or_default())
+                    .map(|w| Pubkey::from_str(&w).unwrap_or_default())
                     .collect::<Vec<Pubkey>>(),
                 readonly: loaded
                     .readonly
                     .iter()
-                    .map(|r| Pubkey::from_str(r).unwrap_or_default())
+                    .map(|r| Pubkey::from_str(&r).unwrap_or_default())
                     .collect::<Vec<Pubkey>>(),
             }
         },

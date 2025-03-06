@@ -1,15 +1,13 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use super::super::types::*;
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x0b")]
-pub struct MintNewEditionFromMasterEditionViaToken {
-    pub mint_new_edition_from_master_edition_via_token_args:
-        MintNewEditionFromMasterEditionViaTokenArgs,
+pub struct MintNewEditionFromMasterEditionViaToken{
+    pub mint_new_edition_from_master_edition_via_token_args: MintNewEditionFromMasterEditionViaTokenArgs,
 }
 
 pub struct MintNewEditionFromMasterEditionViaTokenInstructionAccounts {
@@ -32,14 +30,21 @@ pub struct MintNewEditionFromMasterEditionViaTokenInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for MintNewEditionFromMasterEditionViaToken {
     type ArrangedAccounts = MintNewEditionFromMasterEditionViaTokenInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [new_metadata, new_edition, master_edition, new_mint, edition_mark_pda, new_mint_authority, payer, token_account_owner, token_account, new_metadata_update_authority, metadata, token_program, system_program, rent, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let new_metadata = accounts.get(0)?;
+        let new_edition = accounts.get(1)?;
+        let master_edition = accounts.get(2)?;
+        let new_mint = accounts.get(3)?;
+        let edition_mark_pda = accounts.get(4)?;
+        let new_mint_authority = accounts.get(5)?;
+        let payer = accounts.get(6)?;
+        let token_account_owner = accounts.get(7)?;
+        let token_account = accounts.get(8)?;
+        let new_metadata_update_authority = accounts.get(9)?;
+        let metadata = accounts.get(10)?;
+        let token_program = accounts.get(11)?;
+        let system_program = accounts.get(12)?;
+        let rent = accounts.get(13)?;
 
         Some(MintNewEditionFromMasterEditionViaTokenInstructionAccounts {
             new_metadata: new_metadata.pubkey,

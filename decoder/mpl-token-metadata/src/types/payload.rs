@@ -1,8 +1,8 @@
-use {
-    super::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-    std::hash::{Hash, Hasher},
-};
+use std::hash::{Hash, Hasher};
+
+use super::*;
+
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
 #[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone)]
 pub struct Payload {

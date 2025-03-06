@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -15,12 +14,12 @@ pub struct CreateTokenLedgerInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CreateTokenLedger {
     type ArrangedAccounts = CreateTokenLedgerInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [token_ledger, payer, system_program, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let token_ledger = accounts.get(0)?;
+        let payer = accounts.get(1)?;
+        let system_program = accounts.get(2)?;
 
         Some(CreateTokenLedgerInstructionAccounts {
             token_ledger: token_ledger.pubkey,

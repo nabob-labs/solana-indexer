@@ -1,8 +1,7 @@
-use {
-    super::OrcaWhirlpoolDecoder,
-    crate::PROGRAM_ID,
-    solana_indexer_core::{account::AccountDecoder, deserialize::IndexerDeserialize},
-};
+use solana_indexer_core::account::AccountDecoder;
+use solana_indexer_core::deserialize::IndexerDeserialize;
+
+use super::OrcaWhirlpoolDecoder;
 pub mod fee_tier;
 pub mod position;
 pub mod position_bundle;
@@ -23,16 +22,12 @@ pub enum OrcaWhirlpoolAccount {
     Whirlpool(whirlpool::Whirlpool),
 }
 
-impl AccountDecoder<'_> for OrcaWhirlpoolDecoder {
+impl<'a> AccountDecoder<'a> for OrcaWhirlpoolDecoder {
     type AccountType = OrcaWhirlpoolAccount;
     fn decode_account(
         &self,
         account: &solana_sdk::account::Account,
     ) -> Option<solana_indexer_core::account::DecodedAccount<Self::AccountType>> {
-        if !account.owner.eq(&PROGRAM_ID) {
-            return None;
-        }
-
         if let Some(decoded_account) =
             whirlpools_config_extension::WhirlpoolsConfigExtension::deserialize(
                 account.data.as_slice(),

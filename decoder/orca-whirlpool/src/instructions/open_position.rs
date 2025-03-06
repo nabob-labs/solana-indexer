@@ -1,13 +1,11 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use solana_indexer_core::{borsh, IndexerDeserialize};
+use super::super::types::*;
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x87802f4d0f98f031")]
-pub struct OpenPosition {
+pub struct OpenPosition{
     pub bumps: OpenPositionBumps,
     pub tick_lower_index: i32,
     pub tick_upper_index: i32,
@@ -29,14 +27,17 @@ pub struct OpenPositionInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for OpenPosition {
     type ArrangedAccounts = OpenPositionInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [funder, owner, position, position_mint, position_token_account, whirlpool, token_program, system_program, rent, associated_token_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let funder = accounts.get(0)?;
+        let owner = accounts.get(1)?;
+        let position = accounts.get(2)?;
+        let position_mint = accounts.get(3)?;
+        let position_token_account = accounts.get(4)?;
+        let whirlpool = accounts.get(5)?;
+        let token_program = accounts.get(6)?;
+        let system_program = accounts.get(7)?;
+        let rent = accounts.get(8)?;
+        let associated_token_program = accounts.get(9)?;
 
         Some(OpenPositionInstructionAccounts {
             funder: funder.pubkey,

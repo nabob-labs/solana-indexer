@@ -1,10 +1,11 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+
+use solana_indexer_core::{IndexerDeserialize, borsh};
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x4b5d5ddc2296dac4")]
-pub struct WithdrawObligationCollateralAndRedeemReserveCollateral {
+pub struct WithdrawObligationCollateralAndRedeemReserveCollateral{
     pub collateral_amount: u64,
 }
 
@@ -25,39 +26,40 @@ pub struct WithdrawObligationCollateralAndRedeemReserveCollateralInstructionAcco
     pub instruction_sysvar_account: solana_sdk::pubkey::Pubkey,
 }
 
-impl solana_indexer_core::deserialize::ArrangeAccounts
-    for WithdrawObligationCollateralAndRedeemReserveCollateral
-{
-    type ArrangedAccounts =
-        WithdrawObligationCollateralAndRedeemReserveCollateralInstructionAccounts;
+impl solana_indexer_core::deserialize::ArrangeAccounts for WithdrawObligationCollateralAndRedeemReserveCollateral {
+    type ArrangedAccounts = WithdrawObligationCollateralAndRedeemReserveCollateralInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [owner, obligation, lending_market, lending_market_authority, withdraw_reserve, reserve_liquidity_mint, reserve_source_collateral, reserve_collateral_mint, reserve_liquidity_supply, user_destination_liquidity, placeholder_user_destination_collateral, collateral_token_program, liquidity_token_program, instruction_sysvar_account, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let owner = accounts.get(0)?;
+        let obligation = accounts.get(1)?;
+        let lending_market = accounts.get(2)?;
+        let lending_market_authority = accounts.get(3)?;
+        let withdraw_reserve = accounts.get(4)?;
+        let reserve_liquidity_mint = accounts.get(5)?;
+        let reserve_source_collateral = accounts.get(6)?;
+        let reserve_collateral_mint = accounts.get(7)?;
+        let reserve_liquidity_supply = accounts.get(8)?;
+        let user_destination_liquidity = accounts.get(9)?;
+        let placeholder_user_destination_collateral = accounts.get(10)?;
+        let collateral_token_program = accounts.get(11)?;
+        let liquidity_token_program = accounts.get(12)?;
+        let instruction_sysvar_account = accounts.get(13)?;
 
-        Some(
-            WithdrawObligationCollateralAndRedeemReserveCollateralInstructionAccounts {
-                owner: owner.pubkey,
-                obligation: obligation.pubkey,
-                lending_market: lending_market.pubkey,
-                lending_market_authority: lending_market_authority.pubkey,
-                withdraw_reserve: withdraw_reserve.pubkey,
-                reserve_liquidity_mint: reserve_liquidity_mint.pubkey,
-                reserve_source_collateral: reserve_source_collateral.pubkey,
-                reserve_collateral_mint: reserve_collateral_mint.pubkey,
-                reserve_liquidity_supply: reserve_liquidity_supply.pubkey,
-                user_destination_liquidity: user_destination_liquidity.pubkey,
-                placeholder_user_destination_collateral: placeholder_user_destination_collateral
-                    .pubkey,
-                collateral_token_program: collateral_token_program.pubkey,
-                liquidity_token_program: liquidity_token_program.pubkey,
-                instruction_sysvar_account: instruction_sysvar_account.pubkey,
-            },
-        )
+        Some(WithdrawObligationCollateralAndRedeemReserveCollateralInstructionAccounts {
+            owner: owner.pubkey,
+            obligation: obligation.pubkey,
+            lending_market: lending_market.pubkey,
+            lending_market_authority: lending_market_authority.pubkey,
+            withdraw_reserve: withdraw_reserve.pubkey,
+            reserve_liquidity_mint: reserve_liquidity_mint.pubkey,
+            reserve_source_collateral: reserve_source_collateral.pubkey,
+            reserve_collateral_mint: reserve_collateral_mint.pubkey,
+            reserve_liquidity_supply: reserve_liquidity_supply.pubkey,
+            user_destination_liquidity: user_destination_liquidity.pubkey,
+            placeholder_user_destination_collateral: placeholder_user_destination_collateral.pubkey,
+            collateral_token_program: collateral_token_program.pubkey,
+            liquidity_token_program: liquidity_token_program.pubkey,
+            instruction_sysvar_account: instruction_sysvar_account.pubkey,
+        })
     }
 }

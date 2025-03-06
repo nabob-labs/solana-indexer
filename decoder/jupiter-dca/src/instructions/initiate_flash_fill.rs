@@ -22,14 +22,19 @@ pub struct InitiateFlashFillInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitiateFlashFill {
     type ArrangedAccounts = InitiateFlashFillInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [keeper, dca, input_mint, keeper_in_ata, in_ata, out_ata, instructions_sysvar, system_program, token_program, associated_token_program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let keeper = accounts.get(0)?;
+        let dca = accounts.get(1)?;
+        let input_mint = accounts.get(2)?;
+        let keeper_in_ata = accounts.get(3)?;
+        let in_ata = accounts.get(4)?;
+        let out_ata = accounts.get(5)?;
+        let instructions_sysvar = accounts.get(6)?;
+        let system_program = accounts.get(7)?;
+        let token_program = accounts.get(8)?;
+        let associated_token_program = accounts.get(9)?;
 
         Some(InitiateFlashFillInstructionAccounts {
             keeper: keeper.pubkey,

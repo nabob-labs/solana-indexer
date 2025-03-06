@@ -1,5 +1,4 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
-
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
@@ -17,14 +16,14 @@ pub struct InitializeBinArrayBitmapExtensionInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializeBinArrayBitmapExtension {
     type ArrangedAccounts = InitializeBinArrayBitmapExtensionInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [lb_pair, bin_array_bitmap_extension, funder, system_program, rent, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+        let lb_pair = accounts.get(0)?;
+        let bin_array_bitmap_extension = accounts.get(1)?;
+        let funder = accounts.get(2)?;
+        let system_program = accounts.get(3)?;
+        let rent = accounts.get(4)?;
 
         Some(InitializeBinArrayBitmapExtensionInstructionAccounts {
             lb_pair: lb_pair.pubkey,

@@ -15,12 +15,11 @@ pub struct InitializeAccount3Accounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializeAccount3 {
     type ArrangedAccounts = InitializeAccount3Accounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+fn arrange_accounts(
+        accounts: Vec<solana_sdk::instruction::AccountMeta>,
     ) -> Option<Self::ArrangedAccounts> {
-        let [account, mint, _remaining @ ..] = accounts else {
-            return None;
-        };
+        let account = accounts.get(0)?;
+        let mint = accounts.get(1)?;
 
         Some(InitializeAccount3Accounts {
             account: account.pubkey,

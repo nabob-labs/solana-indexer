@@ -1,13 +1,11 @@
-use {
-    super::super::types::*,
-    solana_indexer_core::{borsh, IndexerDeserialize},
-};
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+use solana_indexer_core::{borsh, IndexerDeserialize};
+use super::super::types::*;
+
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
 #[indexer(discriminator = "0x856e4aaf709ff59f")]
-pub struct InitializeOrder {
+pub struct InitializeOrder{
     pub params: InitializeOrderParams,
 }
 
@@ -32,14 +30,22 @@ pub struct InitializeOrderInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializeOrder {
     type ArrangedAccounts = InitializeOrderInstructionAccounts;
 
-    fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
-    ) -> Option<Self::ArrangedAccounts> {
-        let [payer, maker, order, input_mint_reserve, maker_input_mint_account, fee, referral, input_mint, output_mint, input_token_program, output_token_program, system_program, associated_token_program, event_authority, program, _remaining @ ..] =
-            accounts
-        else {
-            return None;
-        };
+    fn arrange_accounts(accounts: Vec<solana_sdk::instruction::AccountMeta>) -> Option<Self::ArrangedAccounts> {
+        let payer = accounts.get(0)?;
+        let maker = accounts.get(1)?;
+        let order = accounts.get(2)?;
+        let input_mint_reserve = accounts.get(3)?;
+        let maker_input_mint_account = accounts.get(4)?;
+        let fee = accounts.get(5)?;
+        let referral = accounts.get(6)?;
+        let input_mint = accounts.get(7)?;
+        let output_mint = accounts.get(8)?;
+        let input_token_program = accounts.get(9)?;
+        let output_token_program = accounts.get(10)?;
+        let system_program = accounts.get(11)?;
+        let associated_token_program = accounts.get(12)?;
+        let event_authority = accounts.get(13)?;
+        let program = accounts.get(14)?;
 
         Some(InitializeOrderInstructionAccounts {
             payer: payer.pubkey,
