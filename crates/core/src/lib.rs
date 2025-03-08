@@ -72,7 +72,7 @@
 //!
 //! ```rust
 //!
-//! solana_indexer_core::pipeline::Pipeline::builder()
+//!  solana_indexer_core::pipeline::Pipeline::builder()
 //! .datasource(transaction_crawler)
 //! .metrics(Arc::new(LogMetrics::new()))
 //! .metrics(Arc::new(PrometheusMetrics::new()))

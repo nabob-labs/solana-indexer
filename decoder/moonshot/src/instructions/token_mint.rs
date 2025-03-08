@@ -3,14 +3,13 @@ use {
     solana_indexer_core::{borsh, IndexerDeserialize},
 };
 
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone)]
 #[indexer(discriminator = "0x032ca4b87b0df5b3")]
 pub struct TokenMint {
     pub mint_params: TokenMintParams,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct TokenMintInstructionAccounts {
     pub sender: solana_sdk::pubkey::Pubkey,
     pub backend_authority: solana_sdk::pubkey::Pubkey,

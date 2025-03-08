@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-mpl-core"
+name="solana-indexer-decoding-mpl-core"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

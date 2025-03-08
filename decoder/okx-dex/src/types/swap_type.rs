@@ -1,9 +1,9 @@
-use solana_indexer_core::{IndexerDeserialize, borsh};
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
+#[derive(
+    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
+)]
 pub enum SwapType {
     BRIDGE,
     SWAPANDBRIDGE,
 }
-
-

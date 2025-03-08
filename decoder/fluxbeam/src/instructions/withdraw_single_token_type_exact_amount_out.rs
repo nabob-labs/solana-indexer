@@ -3,7 +3,7 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
-#[indexer(discriminator = "0xf3c0468bd19c088b")]
+#[indexer(discriminator = "0x05")]
 pub struct WithdrawSingleTokenTypeExactAmountOut {
     pub destination_token_amount: u64,
     pub maximum_pool_token_amount: u64,

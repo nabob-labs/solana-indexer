@@ -1,8 +1,10 @@
 use super::*;
 
-use solana_indexer_core::{IndexerDeserialize, borsh};
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
+#[derive(
+    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
+)]
 pub struct SwapArgs {
     pub amount_in: u64,
     pub expect_amount_out: u64,

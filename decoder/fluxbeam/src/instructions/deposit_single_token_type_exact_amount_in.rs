@@ -3,7 +3,7 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
-#[indexer(discriminator = "0x63cf042a589d2d37")]
+#[indexer(discriminator = "0x04")]
 pub struct DepositSingleTokenTypeExactAmountIn {
     pub source_token_amount: u64,
     pub minimum_pool_token_amount: u64,

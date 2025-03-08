@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-pumpfun"
+name="solana-indexer-decoding-pumpfun"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

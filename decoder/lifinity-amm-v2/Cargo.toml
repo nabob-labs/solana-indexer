@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-lifinity-amm-v2"
+name="solana-indexer-decoding-lifinity-amm-v2"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -16,3 +16,6 @@ solana-indexer-macros = { workspace = true }
 solana-indexer-proc-macros = { workspace = true }
 serde = { workspace = true }
 solana-sdk = { workspace = true }
+
+[dev-dependencies]
+solana-indexer-test-utils = { workspace = true }

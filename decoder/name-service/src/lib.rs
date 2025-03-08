@@ -1,6 +1,6 @@
 use solana_sdk::{pubkey, pubkey::Pubkey};
 
-pub struct NameServiceDecoder;
+pub struct NameDecoder;
 pub mod accounts;
 pub mod instructions;
 pub mod types;

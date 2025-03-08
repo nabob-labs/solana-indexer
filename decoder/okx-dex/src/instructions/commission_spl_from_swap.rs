@@ -1,10 +1,12 @@
 use super::super::types::*;
 
-use solana_indexer_core::{IndexerDeserialize, borsh};
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
+#[derive(
+    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
+)]
 #[indexer(discriminator = "0x054d9032dee4e9ab")]
-pub struct CommissionSplFromSwap{
+pub struct CommissionSplFromSwap {
     pub args: SwapArgs,
     pub commission_rate: u16,
     pub bridge_to_args: BridgeToArgs,
@@ -29,24 +31,14 @@ pub struct CommissionSplFromSwapInstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for CommissionSplFromSwap {
     type ArrangedAccounts = CommissionSplFromSwapInstructionAccounts;
 
-    fn arrange_accounts(accounts: &[solana_sdk::instruction::AccountMeta]) -> Option<Self::ArrangedAccounts> {
-        let [
-            payer,
-            source_token_account,
-            destination_token_account,
-            source_mint,
-            destination_mint,
-            bridge_program,
-            associated_token_program,
-            token_program,
-            token_2022_program,
-            system_program,
-            commission_token_account,
-            _remaining @ ..
-        ] = accounts else {
+    fn arrange_accounts(
+        accounts: &[solana_sdk::instruction::AccountMeta],
+    ) -> Option<Self::ArrangedAccounts> {
+        let [payer, source_token_account, destination_token_account, source_mint, destination_mint, bridge_program, associated_token_program, token_program, token_2022_program, system_program, commission_token_account, _remaining @ ..] =
+            accounts
+        else {
             return None;
         };
-       
 
         Some(CommissionSplFromSwapInstructionAccounts {
             payer: payer.pubkey,

@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-stabble-weighted-swap"
+name="solana-indexer-decoding-stabble-weighted-swap"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

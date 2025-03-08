@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-memo-program"
+name="solana-indexer-decoding-memo-program"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

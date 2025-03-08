@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-token-program"
+name="solana-indexer-decoding-token-program"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

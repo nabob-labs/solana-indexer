@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-raydium-liquidity-locking"
+name="solana-indexer-decoding-raydium-liquidity-locking"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

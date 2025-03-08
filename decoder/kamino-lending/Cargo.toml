@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-kamino-lending"
+name="solana-indexer-decoding-kamino-lending"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

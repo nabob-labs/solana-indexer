@@ -1,5 +1,5 @@
 use {
-    super::NameServiceDecoder,
+    super::NameDecoder,
     crate::PROGRAM_ID,
     solana_indexer_core::{account::AccountDecoder, deserialize::IndexerDeserialize},
 };
@@ -9,7 +9,7 @@ pub enum NameAccount {
     NameRecordHeader(name_record_header::NameRecordHeader),
 }
 
-impl AccountDecoder<'_> for NameServiceDecoder {
+impl AccountDecoder<'_> for NameDecoder {
     type AccountType = NameAccount;
     fn decode_account(
         &self,

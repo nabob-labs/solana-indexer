@@ -1,8 +1,10 @@
 use super::*;
 
-use solana_indexer_core::{IndexerDeserialize, borsh};
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
+#[derive(
+    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
+)]
 pub struct BridgeToArgs {
     pub adaptor_id: AdaptorID,
     pub to: Vec<u8>,

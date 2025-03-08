@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-raydium-cpmm"
+name="solana-indexer-decoding-raydium-cpmm"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

@@ -1,11 +1,11 @@
 use {
     async_trait::async_trait,
-    metrics::{counter, gauge, histogram},
-    metrics_exporter_prometheus::PrometheusBuilder,
     solana_indexer_core::{
-        error::{Error, IndexerResult},
+        error::{IndexerResult, Error},
         metrics::Metrics,
     },
+    metrics::{counter, gauge, histogram},
+    metrics_exporter_prometheus::PrometheusBuilder,
     std::{collections::HashMap, net::SocketAddrV4, sync::Once},
     tokio::sync::RwLock,
 };

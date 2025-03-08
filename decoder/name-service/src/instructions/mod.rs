@@ -1,6 +1,6 @@
 use crate::PROGRAM_ID;
 
-use super::NameServiceDecoder;
+use super::NameDecoder;
 pub mod create;
 pub mod delete;
 pub mod realloc;
@@ -25,7 +25,7 @@ pub enum NameInstruction {
     Realloc(realloc::Realloc),
 }
 
-impl solana_indexer_core::instruction::InstructionDecoder<'_> for NameServiceDecoder {
+impl solana_indexer_core::instruction::InstructionDecoder<'_> for NameDecoder {
     type InstructionType = NameInstruction;
 
     fn decode_instruction(

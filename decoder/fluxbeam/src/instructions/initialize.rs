@@ -5,12 +5,13 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
-#[indexer(discriminator = "0xafaf6d1f0d989bed")]
+#[indexer(discriminator = "0x00")]
 pub struct Initialize {
     pub fees: Fees,
     pub swap_curve: SwapCurve,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct InitializeInstructionAccounts {
     pub swap: solana_sdk::pubkey::Pubkey,
     pub authority: solana_sdk::pubkey::Pubkey,

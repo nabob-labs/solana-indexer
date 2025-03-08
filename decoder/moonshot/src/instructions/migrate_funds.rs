@@ -6,6 +6,7 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[indexer(discriminator = "0x2ae50ae7bd3ec1ae")]
 pub struct MigrateFunds {}
 
+#[derive(Debug, PartialEq)]
 pub struct MigrateFundsInstructionAccounts {
     pub backend_authority: solana_sdk::pubkey::Pubkey,
     pub migration_authority: solana_sdk::pubkey::Pubkey,

@@ -1,11 +1,12 @@
 use super::super::types::*;
 
-use solana_indexer_core::{IndexerDeserialize, borsh};
+use solana_indexer_core::{borsh, IndexerDeserialize};
 
-
-#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash)]
+#[derive(
+    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
+)]
 #[indexer(discriminator = "0x414b3f4ceb5b5b88")]
-pub struct Swap2{
+pub struct Swap2 {
     pub data: SwapArgs,
     pub order_id: u64,
 }
@@ -21,18 +22,14 @@ pub struct Swap2InstructionAccounts {
 impl solana_indexer_core::deserialize::ArrangeAccounts for Swap2 {
     type ArrangedAccounts = Swap2InstructionAccounts;
 
-    fn arrange_accounts(accounts: &[solana_sdk::instruction::AccountMeta]) -> Option<Self::ArrangedAccounts> {
-        let [
-            payer,
-            source_token_account,
-            destination_token_account,
-            source_mint,
-            destination_mint,
-            _remaining @ ..
-        ] = accounts else {
+    fn arrange_accounts(
+        accounts: &[solana_sdk::instruction::AccountMeta],
+    ) -> Option<Self::ArrangedAccounts> {
+        let [payer, source_token_account, destination_token_account, source_mint, destination_mint, _remaining @ ..] =
+            accounts
+        else {
             return None;
         };
-       
 
         Some(Swap2InstructionAccounts {
             payer: payer.pubkey,

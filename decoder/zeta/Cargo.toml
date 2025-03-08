@@ -1,5 +1,5 @@
 [package]
-name = "solana-indexer-decoding-zeta"
+name="solana-indexer-decoding-zeta"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true
