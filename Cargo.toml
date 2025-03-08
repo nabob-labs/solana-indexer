@@ -49,7 +49,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "2.1.13"
+version = "2.1.11"
 authors = ["Bovey Maintainers <maintainers@solana.xyz>"]
 repository = "https://github.com/nabob-labs/solana-indexer"
 homepage = "https://solana.xyz/"
