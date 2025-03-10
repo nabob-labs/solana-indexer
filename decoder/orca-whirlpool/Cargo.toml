@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-orca-whirlpool"
+name = "solana-indexer-decoding-orca-whirlpool"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

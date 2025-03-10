@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-moonshot"
+name = "solana-indexer-decoding-moonshot"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

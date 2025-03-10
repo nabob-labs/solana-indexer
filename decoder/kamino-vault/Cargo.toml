@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-kamino-vault"
+name = "solana-indexer-decoding-kamino-vault"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

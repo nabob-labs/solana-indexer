@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-mpl-token-metadata"
+name = "solana-indexer-decoding-mpl-token-metadata"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

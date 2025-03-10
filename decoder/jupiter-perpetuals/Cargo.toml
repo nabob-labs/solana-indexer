@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-jupiter-perpetuals"
+name = "solana-indexer-decoding-jupiter-perpetuals"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

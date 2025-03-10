@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-meteora-dlmm"
+name = "solana-indexer-decoding-meteora-dlmm"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

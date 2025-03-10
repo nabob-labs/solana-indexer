@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-stabble-stable-swap"
+name = "solana-indexer-decoding-stabble-stable-swap"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

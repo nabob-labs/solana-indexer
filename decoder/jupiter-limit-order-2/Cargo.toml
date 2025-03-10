@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-jupiter-limit-order-2"
+name = "solana-indexer-decoding-jupiter-limit-order-2"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

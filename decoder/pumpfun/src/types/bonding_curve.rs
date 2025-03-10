@@ -1,7 +1,8 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(IndexerDeserialize, Debug)]
-#[indexer(discriminator = "0x17b7f83760d8ac60")]
+#[derive(
+    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
+)]
 pub struct BondingCurve {
     pub virtual_token_reserves: u64,
     pub virtual_sol_reserves: u64,

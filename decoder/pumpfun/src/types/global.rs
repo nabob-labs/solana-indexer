@@ -3,8 +3,9 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
-#[indexer(discriminator = "0xe445a52e51cb9a1ddfc39ff63e308f83")]
-pub struct SetParamsEvent {
+pub struct Global {
+    pub initialized: bool,
+    pub authority: solana_sdk::pubkey::Pubkey,
     pub fee_recipient: solana_sdk::pubkey::Pubkey,
     pub initial_virtual_token_reserves: u64,
     pub initial_virtual_sol_reserves: u64,

@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-okx-dex"
+name = "solana-indexer-decoding-okx-dex"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true

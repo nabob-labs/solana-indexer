@@ -39,6 +39,7 @@ members = [
     "decoder/spl-associated-token-account",
     "decoder/stabble-stable-swap",
     "decoder/stabble-weighted-swap",
+    "decoder/stake-program",
     "decoder/system-program",
     "decoder/token-2022",
     "decoder/token-program",

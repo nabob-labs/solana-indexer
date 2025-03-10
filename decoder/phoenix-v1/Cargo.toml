@@ -1,5 +1,5 @@
 [package]
-name="solana-indexer-decoding-phoenix-v1"
+name = "solana-indexer-decoding-phoenix-v1"
 version.workspace = true
 authors.workspace = true
 repository.workspace = true
