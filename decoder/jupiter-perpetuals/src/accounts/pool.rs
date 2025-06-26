@@ -6,7 +6,7 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[indexer(discriminator = "0xf19a6d0411b16dbc")]
 pub struct Pool {
     pub name: String,
-    pub custodies: Vec<solana_sdk::pubkey::Pubkey>,
+    pub custodies: Vec<solana_pubkey::Pubkey>,
     pub aum_usd: u128,
     pub limit: Limit,
     pub fees: Fees,

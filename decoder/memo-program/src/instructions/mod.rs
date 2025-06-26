@@ -19,7 +19,7 @@ impl solana_indexer_core::instruction::InstructionDecoder<'_> for MemoProgramDec
 
     fn decode_instruction(
         &self,
-        instruction: &solana_sdk::instruction::Instruction,
+        instruction: &solana_instruction::Instruction,
     ) -> Option<DecodedInstruction<Self::InstructionType>> {
         if !instruction.program_id.eq(&spl_memo::ID) {
             return None;

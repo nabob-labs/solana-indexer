@@ -5,5 +5,5 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 )]
 pub enum SpotFulfillmentMethod {
     ExternalMarket,
-    Match(solana_sdk::pubkey::Pubkey, u16),
+    Match(solana_pubkey::Pubkey, u16),
 }

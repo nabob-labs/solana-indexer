@@ -5,5 +5,5 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 )]
 pub enum EscrowAuthority {
     TokenOwner,
-    Creator(solana_sdk::pubkey::Pubkey),
+    Creator(solana_pubkey::Pubkey),
 }

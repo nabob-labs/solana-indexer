@@ -4,7 +4,7 @@
 //! The `datasource` module defines the `Datasource` trait and associated data
 //! types for handling updates related to accounts, transactions, and account
 //! deletions. This module allows for flexible data ingestion from various
-//! Solana data sources, enabling integration with the `indexer-core` processing
+//! Solana data sources, enabling integration with the `solana-indexer-core` processing
 //! pipeline.
 //!
 //! # Overview
@@ -33,10 +33,16 @@
 //! - Ensure implementations handle errors gracefully, especially when fetching
 //!   data and sending updates to the pipeline.
 
+use solana_program::hash::Hash;
+use solana_transaction_status::Rewards;
 use {
     crate::{error::IndexerResult, metrics::MetricsCollection},
     async_trait::async_trait,
-    solana_sdk::{pubkey::Pubkey, signature::Signature},
+    solana_account::Account,
+    solana_pubkey::Pubkey,
+    solana_signature::Signature,
+    solana_transaction::versioned::VersionedTransaction,
+    solana_transaction_status::TransactionStatusMeta,
     std::sync::Arc,
     tokio_util::sync::CancellationToken,
 };
@@ -59,7 +65,16 @@ use {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use std::sync::Arc;
+/// use solana_indexer_core::datasource::UpdateType;
+/// use solana_indexer_core::datasource::Update;
+/// use solana_indexer_core::error::IndexerResult;
+/// use solana_indexer_core::metrics::MetricsCollection;
+/// use solana_indexer_core::datasource::Datasource;
+/// use tokio_util::sync::CancellationToken;
+/// use async_trait::async_trait;
+///
 /// #[async_trait]
 /// impl Datasource for MyDatasource {
 ///     async fn consume(
@@ -87,7 +102,7 @@ use {
 pub trait Datasource: Send + Sync {
     async fn consume(
         &self,
-        sender: &tokio::sync::mpsc::UnboundedSender<Update>,
+        sender: tokio::sync::mpsc::Sender<Update>,
         cancellation_token: CancellationToken,
         metrics: Arc<MetricsCollection>,
     ) -> IndexerResult<()>;
@@ -95,7 +110,7 @@ pub trait Datasource: Send + Sync {
     fn update_types(&self) -> Vec<UpdateType>;
 }
 
-/// Represents a data update in the `indexer-core` pipeline, encompassing
+/// Represents a data update in the `solana-indexer-core` pipeline, encompassing
 /// different update types.
 ///
 /// - `Account`: Represents an update to an account's data.
@@ -107,6 +122,7 @@ pub enum Update {
     Account(AccountUpdate),
     Transaction(Box<TransactionUpdate>),
     AccountDeletion(AccountDeletion),
+    BlockDetails(BlockDetails),
 }
 
 /// Enumerates the types of updates a datasource can provide.
@@ -136,8 +152,31 @@ pub enum UpdateType {
 #[derive(Debug, Clone)]
 pub struct AccountUpdate {
     pub pubkey: Pubkey,
-    pub account: solana_sdk::account::Account,
+    pub account: Account,
     pub slot: u64,
+}
+
+/// Represents the details of a Solana block, including its slot, hashes, rewards, and timing information.
+///
+/// The `BlockDetails` struct encapsulates the essential information for a block,
+/// providing details about its slot, blockhashes, rewards, and other metadata.
+///
+/// - `slot`: The slot number in which this block was recorded.
+/// - `previous_block_hash`: The hash of the previous block in the blockchain.
+/// - `block_hash`: The hash of the current block.
+/// - `rewards`: Optional rewards information associated with the block, such as staking rewards.
+/// - `num_reward_partitions`: Optional number of reward partitions in the block.
+/// - `block_time`: Optional Unix timestamp indicating when the block was processed.
+/// - `block_height`: Optional height of the block in the blockchain.#[derive(Debug, Clone)]
+#[derive(Debug, Clone)]
+pub struct BlockDetails {
+    pub slot: u64,
+    pub block_hash: Option<Hash>,
+    pub previous_block_hash: Option<Hash>,
+    pub rewards: Option<Rewards>,
+    pub num_reward_partitions: Option<u64>,
+    pub block_time: Option<i64>,
+    pub block_height: Option<u64>,
 }
 
 /// Represents the deletion of a Solana account, containing the account's public
@@ -171,14 +210,16 @@ pub struct AccountDeletion {
 /// - `is_vote`: A boolean indicating whether the transaction is a vote.
 /// - `slot`: The slot number in which the transaction was recorded.
 /// - `block_time`: The Unix timestamp of when the transaction was processed.
+/// - `block_hash`: Block hash that can be used to detect a fork.
 ///
 /// Note: The `block_time` field may not be returned in all scenarios.
 #[derive(Debug, Clone)]
 pub struct TransactionUpdate {
     pub signature: Signature,
-    pub transaction: solana_sdk::transaction::VersionedTransaction,
-    pub meta: solana_transaction_status::TransactionStatusMeta,
+    pub transaction: VersionedTransaction, // TODO: replace with solana_transaction crate after 2.2.0 release
+    pub meta: TransactionStatusMeta,
     pub is_vote: bool,
     pub slot: u64,
     pub block_time: Option<i64>,
+    pub block_hash: Option<Hash>,
 }

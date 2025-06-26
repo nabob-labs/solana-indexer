@@ -5,9 +5,9 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(IndexerDeserialize, Debug)]
 #[indexer(discriminator = "0xec3d2abe980c6a74")]
 pub struct TriggerOrder {
-    pub owner: solana_sdk::pubkey::Pubkey,
-    pub margin_account: solana_sdk::pubkey::Pubkey,
-    pub open_orders: solana_sdk::pubkey::Pubkey,
+    pub owner: solana_pubkey::Pubkey,
+    pub margin_account: solana_pubkey::Pubkey,
+    pub open_orders: solana_pubkey::Pubkey,
     pub order_price: u64,
     pub trigger_price: Option<u64>,
     pub trigger_ts: Option<u64>,

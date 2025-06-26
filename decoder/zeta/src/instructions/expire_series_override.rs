@@ -15,14 +15,9 @@ pub struct ExpireSeriesOverrideInstructionAccounts {}
 impl solana_indexer_core::deserialize::ArrangeAccounts for ExpireSeriesOverride {
     type ArrangedAccounts = ExpireSeriesOverrideInstructionAccounts;
 
-    #[allow(irrefutable_let_patterns)]
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        _accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
-        let [_remaining @ ..] = accounts else {
-            return None;
-        };
-
         Some(ExpireSeriesOverrideInstructionAccounts {})
     }
 }

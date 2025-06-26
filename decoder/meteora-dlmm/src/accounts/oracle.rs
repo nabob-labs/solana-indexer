@@ -1,6 +1,6 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(IndexerDeserialize, Debug)]
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize)]
 #[indexer(discriminator = "0x8bc283b38cb3e5f4")]
 pub struct Oracle {
     pub idx: u64,

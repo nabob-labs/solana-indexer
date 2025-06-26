@@ -1,6 +1,6 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(IndexerDeserialize, Debug)]
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize)]
 #[indexer(discriminator = "0xf23ef422b5703aaa")]
 pub struct PresetParameter {
     pub bin_step: u16,

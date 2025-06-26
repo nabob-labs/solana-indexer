@@ -2,7 +2,7 @@
 //! within the pipeline.
 //!
 //! This module includes the necessary components for handling account data
-//! updates in the `indexer-core` pipeline. It provides abstractions for decoding
+//! updates in the `solana-indexer-core` pipeline. It provides abstractions for decoding
 //! accounts, processing account metadata, and implementing account-specific
 //! pipes, which are integral to the pipeline's account update processing.
 //!
@@ -21,8 +21,7 @@
 //!
 //! # Example
 //!
-//! ```rust
-//!
+//! ```ignore
 //! struct MyAccountDecoder;
 //!
 //! impl<'a> AccountDecoder<'a> for MyAccountDecoder {
@@ -30,7 +29,7 @@
 //!
 //!     fn decode_account(
 //!         &self,
-//!         account: &'a solana_sdk::account::Account,
+//!         account: &'a solana_account::Account,
 //!     ) -> Option<DecodedAccount<Self::AccountType>> {
 //!         // Custom decoding logic here
 //!         Some(DecodedAccount {
@@ -54,7 +53,7 @@
 use {
     crate::{error::IndexerResult, metrics::MetricsCollection, processor::Processor},
     async_trait::async_trait,
-    solana_sdk::pubkey::Pubkey,
+    solana_pubkey::Pubkey,
     std::sync::Arc,
 };
 
@@ -119,14 +118,15 @@ pub trait AccountDecoder<'a> {
 
     fn decode_account(
         &self,
-        account: &'a solana_sdk::account::Account,
+        account: &'a solana_account::Account,
     ) -> Option<DecodedAccount<Self::AccountType>>;
 }
 
 /// The input type for the account processor.
 ///
 /// - `T`: The account type, as determined by the decoder.
-pub type AccountProcessorInputType<T> = (AccountMetadata, DecodedAccount<T>);
+pub type AccountProcessorInputType<T> =
+    (AccountMetadata, DecodedAccount<T>, solana_account::Account);
 
 /// A processing pipe that decodes and processes Solana account updates.
 ///
@@ -159,12 +159,19 @@ pub struct AccountPipe<T: Send> {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use solana_indexer_core::error::IndexerResult;
+/// use solana_indexer_core::metrics::MetricsCollection;
+/// use solana_indexer_core::account::AccountMetadata;
+/// use solana_indexer_core::account::AccountPipes;
+/// use std::sync::Arc;
+/// use async_trait::async_trait;
+///
 /// #[async_trait]
 /// impl AccountPipes for MyAccountPipe {
 ///     async fn run(
 ///         &mut self,
-///         account_with_metadata: (AccountMetadata, solana_sdk::account::Account),
+///         account_with_metadata: (AccountMetadata, solana_account::Account),
 ///         metrics: Arc<MetricsCollection>,
 ///     ) -> IndexerResult<()> {
 ///         // Custom processing logic here
@@ -182,7 +189,7 @@ pub struct AccountPipe<T: Send> {
 pub trait AccountPipes: Send + Sync {
     async fn run(
         &mut self,
-        account_with_metadata: (AccountMetadata, solana_sdk::account::Account),
+        account_with_metadata: (AccountMetadata, solana_account::Account),
         metrics: Arc<MetricsCollection>,
     ) -> IndexerResult<()>;
 }
@@ -191,7 +198,7 @@ pub trait AccountPipes: Send + Sync {
 impl<T: Send> AccountPipes for AccountPipe<T> {
     async fn run(
         &mut self,
-        account_with_metadata: (AccountMetadata, solana_sdk::account::Account),
+        account_with_metadata: (AccountMetadata, solana_account::Account),
         metrics: Arc<MetricsCollection>,
     ) -> IndexerResult<()> {
         log::trace!(
@@ -201,7 +208,14 @@ impl<T: Send> AccountPipes for AccountPipe<T> {
 
         if let Some(decoded_account) = self.decoder.decode_account(&account_with_metadata.1) {
             self.processor
-                .process((account_with_metadata.0, decoded_account), metrics)
+                .process(
+                    (
+                        account_with_metadata.0.clone(),
+                        decoded_account,
+                        account_with_metadata.1,
+                    ),
+                    metrics.clone(),
+                )
                 .await?;
         }
         Ok(())

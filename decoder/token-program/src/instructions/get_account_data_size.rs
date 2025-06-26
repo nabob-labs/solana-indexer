@@ -6,14 +6,14 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct GetAccountDataSize {}
 
 pub struct GetAccountDataSizeAccounts {
-    pub mint: solana_sdk::pubkey::Pubkey,
+    pub mint: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for GetAccountDataSize {
     type ArrangedAccounts = GetAccountDataSizeAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let mint = accounts.first()?;
 

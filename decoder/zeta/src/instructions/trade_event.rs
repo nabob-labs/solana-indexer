@@ -5,7 +5,7 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 )]
 #[indexer(discriminator = "0xe445a52e51cb9a1dbddb7fd34ee661ee")]
 pub struct TradeEvent {
-    pub margin_account: solana_sdk::pubkey::Pubkey,
+    pub margin_account: solana_pubkey::Pubkey,
     pub index: u8,
     pub size: u64,
     pub cost_of_trades: u64,

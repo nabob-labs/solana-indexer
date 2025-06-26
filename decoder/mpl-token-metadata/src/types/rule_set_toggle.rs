@@ -6,5 +6,5 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub enum RuleSetToggle {
     None,
     Clear,
-    Set(solana_sdk::pubkey::Pubkey),
+    Set(solana_pubkey::Pubkey),
 }

@@ -4,12 +4,15 @@ use super::super::types::*;
 {% raw %} 
 use solana_indexer_core::{borsh, IndexerDeserialize};
 
-#[derive(IndexerDeserialize, Debug)]
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize)]
 {% endraw %} 
 
-#[indexer(discriminator = "{{account.discriminator }}")]
+#[indexer(discriminator = "{{account.discriminator }}")] 
 pub struct {{ account.struct_name }} { 
     {%- for field in account.fields %} 
+        {%- if let Some(attributes) = field.attributes %}
+        {{ attributes }}
+        {%- endif %}
         pub {{ field.name }}: {{ field.rust_type }}, 
     {%- endfor %} 
 }

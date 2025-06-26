@@ -1,3 +1,4 @@
+use alloc::string::String;
 use solana_indexer_core::{borsh, IndexerDeserialize};
 
 #[derive(

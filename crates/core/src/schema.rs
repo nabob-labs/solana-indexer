@@ -1,5 +1,5 @@
 //! Defines the structures and functions for constructing and matching
-//! transaction schemas in `indexer-core`.
+//! transaction schemas in `solana-indexer-core`.
 //!
 //! This module provides the `TransactionSchema`, `SchemaNode`, and
 //! `InstructionSchemaNode` types, enabling users to define and validate
@@ -41,7 +41,8 @@
 use {
     crate::{collection::InstructionDecoderCollection, instruction::DecodedInstruction},
     serde::de::DeserializeOwned,
-    solana_sdk::{instruction::AccountMeta, pubkey::Pubkey},
+    solana_instruction::AccountMeta,
+    solana_pubkey::Pubkey,
     std::collections::HashMap,
 };
 

@@ -6,14 +6,14 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct SyncNative {}
 
 pub struct SyncNativeAccounts {
-    pub account: solana_sdk::pubkey::Pubkey,
+    pub account: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for SyncNative {
     type ArrangedAccounts = SyncNativeAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let account = accounts.first()?;
 

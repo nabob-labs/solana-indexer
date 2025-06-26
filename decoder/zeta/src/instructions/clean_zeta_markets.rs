@@ -7,15 +7,15 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct CleanZetaMarkets {}
 
 pub struct CleanZetaMarketsInstructionAccounts {
-    pub state: solana_sdk::pubkey::Pubkey,
-    pub zeta_group: solana_sdk::pubkey::Pubkey,
+    pub state: solana_pubkey::Pubkey,
+    pub zeta_group: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for CleanZetaMarkets {
     type ArrangedAccounts = CleanZetaMarketsInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [state, zeta_group, _remaining @ ..] = accounts else {
             return None;

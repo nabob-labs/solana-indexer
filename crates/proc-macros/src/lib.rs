@@ -1,6 +1,6 @@
 //! # Indexer Proc Macros
 //!
-//! `indexer-proc-macros` is a collection of procedural macros designed to
+//! `solana-indexer-proc-macros` is a collection of procedural macros designed to
 //! simplify and enhance Rust-based development for Solana programs using the
 //! Indexer framework. This crate provides macros for generating
 //! deserialization implementations, instruction decoders, and type conversions.
@@ -10,7 +10,7 @@
 //! The macros in this crate are intended to streamline common patterns
 //! encountered when working with Indexer, particularly around deserialization,
 //! instruction decoding, and structuring custom types. By leveraging
-//! `indexer-proc-macros`, you can reduce the amount of manual coding and ensure
+//! `solana-indexer-proc-macros`, you can reduce the amount of manual coding and ensure
 //! consistent, performant handling of Solana-specific data structures.
 //!
 //! ## Key Features
@@ -40,9 +40,8 @@
 //! ## Contribution
 //!
 //! Contributions are welcome! If you have ideas for improving or expanding the
-//! functionality of `indexer_macros`, please consider submitting a pull request
+//! functionality of `solana_indexer_macros`, please consider submitting a pull request
 //! or opening an issue on the project’s GitHub repository.
-
 use {
     borsh_derive_internal::*,
     proc_macro::TokenStream,
@@ -82,7 +81,9 @@ use {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use solana_indexer_proc_macros::IndexerDeserialize;
+///
 /// #[derive(IndexerDeserialize)]
 /// #[indexer(discriminator = "0x01")]
 /// struct Message {
@@ -128,7 +129,6 @@ pub fn indexer_deserialize_derive(input_token_stream: TokenStream) -> TokenStrea
     let name = &input.ident;
 
     let discriminator = get_discriminator(&input.attrs).unwrap_or(quote! { &[] });
-
     let deser = gen_borsh_deserialize(input_token_stream);
 
     let expanded = quote! {
@@ -142,12 +142,25 @@ pub fn indexer_deserialize_derive(input_token_stream: TokenStream) -> TokenStrea
                     return None;
                 }
 
-                let (disc, rest) = data.split_at(discriminator.len());
+
+                let (disc, mut rest) = data.split_at(discriminator.len());
                 if disc != discriminator {
                     return None;
                 }
 
-                solana_indexer_core::borsh::BorshDeserialize::try_from_slice(rest).ok()
+                 match solana_indexer_core::borsh::BorshDeserialize::deserialize(&mut rest) {
+                    Ok(res) => {
+                        if !rest.is_empty() {
+                            solana_indexer_core::log::warn!(
+                                "Not all bytes were read when deserializing {}: {} bytes remaining",
+                                stringify!(#name),
+                                rest.len(),
+                            );
+                        }
+                        Some(res)
+                    }
+                    Err(_) => None,
+                }
             }
         }
     };
@@ -173,7 +186,8 @@ pub fn indexer_deserialize_derive(input_token_stream: TokenStream) -> TokenStrea
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use solana_indexer_proc_macros::IndexerDeserialize;
 ///
 /// #[derive(IndexerDeserialize)]
 /// #[indexer(discriminator = "0x1234")]
@@ -215,7 +229,7 @@ pub fn indexer_deserialize_derive(input_token_stream: TokenStream) -> TokenStrea
 fn gen_borsh_deserialize(input: TokenStream) -> TokenStream2 {
     let cratename = Ident::new("borsh", Span::call_site());
 
-    let item: Item = syn::parse(input).unwrap();
+    let item: Item = syn::parse(input).expect("Failed to parse input");
     let res = match item {
         Item::Struct(item) => struct_de(&item, cratename),
         Item::Enum(item) => enum_de(&item, cratename),
@@ -249,8 +263,9 @@ fn gen_borsh_deserialize(input: TokenStream) -> TokenStream2 {
 ///
 /// # Example
 ///
-/// ```rust
-/// ///
+/// ```ignore
+/// use syn::Attribute;
+///
 /// // Example attribute with a discriminator
 /// let attrs: Vec<Attribute> = vec![parse_quote!(#[indexer(discriminator = "0x1234")])];
 /// let discriminator = get_discriminator(&attrs);
@@ -338,7 +353,9 @@ fn get_discriminator(attrs: &[syn::Attribute]) -> Option<quote::__private::Token
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use syn::Ident;
+/// use syn::parse_quote;
 ///
 /// let instructions_enum_name: Ident = parse_quote!(InstructionsEnum);
 /// let instruction_types_enum_name: Ident = parse_quote!(InstructionTypesEnum);
@@ -401,7 +418,7 @@ struct InstructionMacroInput {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
 ///
 /// let program_variant: Ident = parse_quote!(MyProgram);
 /// let decoder_expr: Expr = parse_quote!(MyDecoder);
@@ -471,7 +488,7 @@ struct InstructionEntry {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
 ///
 /// let input = parse_quote! {
 ///     MyInstructionsEnum, MyInstructionTypesEnum, MyProgramsEnum,
@@ -573,7 +590,7 @@ impl Parse for InstructionMacroInput {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
 /// instruction_decoder_collection!(
 ///     AllInstructions, AllInstructionTypes, AllPrograms,
 ///     JupSwap => JupiterDecoder => JupiterInstruction,
@@ -627,7 +644,12 @@ pub fn instruction_decoder_collection(input: TokenStream) -> TokenStream {
         let decoder_expr = entry.decoder_expr;
         let instruction_type = entry.instruction_type;
 
-        let instruction_enum_ident = &instruction_type.path.segments.last().unwrap().ident;
+        let instruction_enum_ident = &instruction_type
+            .path
+            .segments
+            .last()
+            .expect("segment")
+            .ident;
         let instruction_type_ident = format_ident!("{}Type", instruction_enum_ident);
 
         instruction_variants.push(quote! {
@@ -677,7 +699,7 @@ pub fn instruction_decoder_collection(input: TokenStream) -> TokenStream {
             type InstructionType = #instruction_types_enum_name;
 
             fn parse_instruction(
-                instruction: &solana_sdk::instruction::Instruction
+                instruction: &solana_instruction::Instruction
             ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self>> {
                 #(#parse_instruction_arms)*
                 None
@@ -733,6 +755,8 @@ pub fn instruction_decoder_collection(input: TokenStream) -> TokenStream {
 /// # Example
 ///
 /// ```rust
+/// use solana_indexer_proc_macros::InstructionType;
+///
 /// #[derive(InstructionType)]
 /// enum Instructions {
 ///     NoData,

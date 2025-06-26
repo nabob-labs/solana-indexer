@@ -5,8 +5,8 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(IndexerDeserialize, Debug)]
 #[indexer(discriminator = "0x9f755fe3ef973aec")]
 pub struct User {
-    pub authority: solana_sdk::pubkey::Pubkey,
-    pub delegate: solana_sdk::pubkey::Pubkey,
+    pub authority: solana_pubkey::Pubkey,
+    pub delegate: solana_pubkey::Pubkey,
     pub name: [u8; 32],
     pub spot_positions: [SpotPosition; 8],
     pub perp_positions: [PerpPosition; 8],

@@ -1,15 +1,14 @@
 use solana_indexer_core::account::AccountDecoder;
-use solana_indexer_core::deserialize::IndexerDeserialize;
 
 use super::OkxDexDecoder;
 
 pub enum OkxDexAccount {}
 
-impl<'a> AccountDecoder<'a> for OkxDexDecoder {
+impl AccountDecoder<'_> for OkxDexDecoder {
     type AccountType = OkxDexAccount;
     fn decode_account(
         &self,
-        _account: &solana_sdk::account::Account,
+        _account: &solana_account::Account,
     ) -> Option<solana_indexer_core::account::DecodedAccount<Self::AccountType>> {
         None
     }

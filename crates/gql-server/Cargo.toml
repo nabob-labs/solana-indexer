@@ -1,0 +1,21 @@
+[package]
+name = "solana-indexer-gql-server"
+version.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[dependencies]
+axum = { workspace = true }
+solana-indexer-postgres-client = { workspace = true }
+juniper = { workspace = true }
+juniper_axum = { workspace = true }
+juniper_graphql_ws = { workspace = true }
+serde = { workspace = true }
+solana-pubkey = { workspace = true }
+tokio = { workspace = true }
+
+[lib]
+crate-type = ["rlib"]

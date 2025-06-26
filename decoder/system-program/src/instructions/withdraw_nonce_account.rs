@@ -1,31 +1,34 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
+
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
-#[indexer(discriminator = "0x05")]
-pub struct WithdrawNonceAccount(u64);
+#[indexer(discriminator = "0x05000000")]
+pub struct WithdrawNonceAccount {
+    pub withdraw_amount: u64,
+}
 
-pub struct WithdrawNonceAccountAccounts {
-    pub nonce_account: solana_sdk::pubkey::Pubkey,
-    pub recipient_account: solana_sdk::pubkey::Pubkey,
-    pub recent_blockhashes_sysvar: solana_sdk::pubkey::Pubkey,
-    pub rent_sysvar: solana_sdk::pubkey::Pubkey,
-    pub nonce_authority: solana_sdk::pubkey::Pubkey,
+pub struct WithdrawNonceAccountInstructionAccounts {
+    pub nonce_account: solana_pubkey::Pubkey,
+    pub recipient_account: solana_pubkey::Pubkey,
+    pub recent_blockhashes_sysvar: solana_pubkey::Pubkey,
+    pub rent_sysvar: solana_pubkey::Pubkey,
+    pub nonce_authority: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for WithdrawNonceAccount {
-    type ArrangedAccounts = WithdrawNonceAccountAccounts;
+    type ArrangedAccounts = WithdrawNonceAccountInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
-        let [nonce_account, recipient_account, recent_blockhashes_sysvar, rent_sysvar, nonce_authority] =
+        let [nonce_account, recipient_account, recent_blockhashes_sysvar, rent_sysvar, nonce_authority, _remaining @ ..] =
             accounts
         else {
             return None;
         };
 
-        Some(WithdrawNonceAccountAccounts {
+        Some(WithdrawNonceAccountInstructionAccounts {
             nonce_account: nonce_account.pubkey,
             recipient_account: recipient_account.pubkey,
             recent_blockhashes_sysvar: recent_blockhashes_sysvar.pubkey,

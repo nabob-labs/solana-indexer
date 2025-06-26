@@ -1,36 +1,36 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
-#[indexer(discriminator = "0x03")]
+use solana_indexer_core::{borsh, deserialize::U64PrefixString, IndexerDeserialize};
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Clone)]
+#[indexer(discriminator = "0x03000000")]
 pub struct CreateAccountWithSeed {
-    pub base: solana_sdk::pubkey::Pubkey,
-    pub seed: String,
-    pub lamports: u64,
+    pub base: solana_pubkey::Pubkey,
+    pub seed: U64PrefixString,
+    pub amount: u64,
     pub space: u64,
-    pub owner: solana_sdk::pubkey::Pubkey,
+    pub program_address: solana_pubkey::Pubkey,
 }
 
-pub struct CreateAccountWithSeedAccounts {
-    pub funding_account: solana_sdk::pubkey::Pubkey,
-    pub created_account: solana_sdk::pubkey::Pubkey,
-    pub base_account: Option<solana_sdk::pubkey::Pubkey>,
+#[derive(Debug, PartialEq)]
+pub struct CreateAccountWithSeedInstructionAccounts {
+    pub payer: solana_pubkey::Pubkey,
+    pub new_account: solana_pubkey::Pubkey,
+    pub base_account: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for CreateAccountWithSeed {
-    type ArrangedAccounts = CreateAccountWithSeedAccounts;
+    type ArrangedAccounts = CreateAccountWithSeedInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
-        let [funding_account, created_account, _remaining @ ..] = accounts else {
+        let [payer, new_account, _remaining @ ..] = accounts else {
             return None;
         };
 
-        Some(CreateAccountWithSeedAccounts {
-            funding_account: funding_account.pubkey,
-            created_account: created_account.pubkey,
-            base_account: accounts.get(2).cloned().map(|acc| acc.pubkey),
+        Some(CreateAccountWithSeedInstructionAccounts {
+            payer: payer.pubkey,
+            new_account: new_account.pubkey,
+            base_account: accounts.get(2).unwrap_or(payer).pubkey,
         })
     }
 }

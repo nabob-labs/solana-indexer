@@ -1,5 +1,5 @@
 //! Defines the `Error` enum and `IndexerResult` type used for error handling in
-//! the `indexer-core` framework.
+//! the `solana-indexer-core` framework.
 //!
 //! The `Error` enum captures various error types that can occur within the
 //! framework, providing detailed error messages and support for custom error
@@ -15,7 +15,7 @@
 //!   successful return type.
 //!
 //! These errors are essential for handling various scenarios that may arise
-//! during data processing in the `indexer-core` pipeline, including missing
+//! during data processing in the `solana-indexer-core` pipeline, including missing
 //! update types, missing transaction components, and custom errors for more
 //! flexible error management.
 //!
@@ -24,7 +24,7 @@
 //! - Implementing `thiserror::Error` provides automatic derivation of error
 //!   display messages.
 //! - Each error variant corresponds to a unique error scenario within the
-//!   `indexer-core` framework.
+//!   `solana-indexer-core` framework.
 
 use {crate::datasource::UpdateType, thiserror::Error};
 
@@ -50,20 +50,22 @@ pub enum Error {
 
 /// A type alias for `Result` with the `Error` type as the error variant.
 ///
-/// This alias simplifies function signatures in the `indexer-core` framework by
+/// This alias simplifies function signatures in the `solana-indexer-core` framework by
 /// unifying error handling under a common type. Any function that may result in
 /// an `Error` can return a `IndexerResult`, providing clear and consistent error
 /// reporting.
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use core::error::Error;
+/// use solana_indexer_core::error::IndexerResult;
 ///
 /// fn example_function(success: bool) -> IndexerResult<()> {
 ///     if success {
 ///         Ok(())
 ///     } else {
-///         Err(Error::MissingInstructionData)
+///        Err(<dyn Error>::MissingInstructionData)
 ///     }
 /// }
 ///

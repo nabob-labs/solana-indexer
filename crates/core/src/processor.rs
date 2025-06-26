@@ -1,4 +1,4 @@
-//! Defines the `Processor` trait for processing data within the `indexer-core`
+//! Defines the `Processor` trait for processing data within the `solana-indexer-core`
 //! pipeline.
 //!
 //! The `Processor` trait provides a standardized interface for handling various
@@ -78,7 +78,13 @@ use {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use async_trait::async_trait;
+/// use solana_indexer_core::error::IndexerResult;
+/// use solana_indexer_core::metrics::MetricsCollection;
+/// use solana_indexer_core::processor::Processor;
+/// use std::sync::Arc;
+///
 /// struct CustomProcessor;
 ///
 /// #[async_trait]

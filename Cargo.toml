@@ -4,53 +4,70 @@ members = [
     "crates/proc-macros",
     "crates/core",
     "crates/cli",
+    "crates/postgres-client",
+    "crates/gql-server",
     "crates/test-utils",
     "metrics/log",
     "metrics/prometheus",
     "datasource/rpc-block-subscribe",
     "datasource/rpc-program-subscribe",
     "datasource/rpc-transaction-crawler",
-    "datasource/grpc-highway-gateway",
+    "datasource/rpc-block-crawler",
+    "datasource/solana-grpc",
+    "decoder/address-lookup-table",
+    "decoder/associated-token-account",
+    "decoder/boop",
     "decoder/drift-v2",
     "decoder/fluxbeam",
+    "decoder/gavel",
     "decoder/jupiter-dca",
-    "decoder/jupiter-limit-order-2",
     "decoder/jupiter-limit-order",
+    "decoder/jupiter-limit-order-2",
     "decoder/jupiter-perpetuals",
     "decoder/jupiter-swap",
+    "decoder/kamino-farms",
     "decoder/kamino-lending",
+    "decoder/kamino-limit-order",
     "decoder/kamino-vault",
     "decoder/lifinity-amm-v2",
+    "decoder/marginfi-v2",
+    "decoder/marinade-finance",
     "decoder/memo-program",
+    "decoder/meteora-damm-v2",
     "decoder/meteora-dlmm",
+    "decoder/meteora-pools",
     "decoder/moonshot",
     "decoder/mpl-core",
     "decoder/mpl-token-metadata",
     "decoder/name-service",
+    "decoder/okx-dex",
     "decoder/openbook-v2",
     "decoder/orca-whirlpool",
     "decoder/phoenix-v1",
+    "decoder/pump-swap",
     "decoder/pumpfun",
     "decoder/raydium-amm-v4",
     "decoder/raydium-clmm",
     "decoder/raydium-cpmm",
+    "decoder/raydium-launchpad",
     "decoder/raydium-liquidity-locking",
     "decoder/sharky",
-    "decoder/spl-associated-token-account",
+    "decoder/solayer-restaking-program",
     "decoder/stabble-stable-swap",
     "decoder/stabble-weighted-swap",
     "decoder/stake-program",
     "decoder/system-program",
     "decoder/token-2022",
     "decoder/token-program",
+    "decoder/virtual-curve",
+    "decoder/virtuals",
     "decoder/zeta",
-    "decoder/okx-dex",
 ]
 
 resolver = "2"
 
 [workspace.package]
-version = "2.1.11"
+version = "2.2.17"
 authors = ["Bovey Maintainers <maintainers@solana.xyz>"]
 repository = "https://github.com/nabob-labs/solana-indexer"
 homepage = "https://solana.xyz/"
@@ -62,25 +79,37 @@ solana-indexer-macros = { path = "crates/macros" }
 solana-indexer-proc-macros = { path = "crates/proc-macros" }
 solana-indexer-core = { path = "crates/core" }
 solana-indexer-cli = { path = "crates/cli" }
+solana-indexer-postgres-client = { path = "crates/postgres-client" }
+solana-indexer-gql-server = { path = "crates/gql-server" }
 solana-indexer-test-utils = { path = "crates/test-utils" }
 solana-indexer-metrics-log = { path = "metrics/log" }
 solana-indexer-metrics-prometheus = { path = "metrics/prometheus" }
 solana-indexer-datasource-rpc-block-subscribe = { path = "datasource/rpc-block-subscribe" }
 solana-indexer-datasource-rpc-program-subscribe = { path = "datasource/rpc-program-subscribe" }
 solana-indexer-datasource-rpc-transaction-crawler = { path = "datasource/rpc-transaction-crawler" }
-solana-indexer-datasource-grpc-highway-gateway = { path = "datasource/grpc-highway-gateway" }
+solana-indexer-datasource-solana-grpc = { path = "datasource/solana-grpc" }
+solana-indexer-decoding-address-lookup-table = { path = "decoder/address-lookup-table" }
+solana-indexer-decoding-associated-token-account = { path = "decoder/associated-token-account" }
+solana-indexer-decoding-boop = { path = "decoder/boop" }
 solana-indexer-decoding-drift-v2 = { path = "decoder/drift-v2" }
 solana-indexer-decoding-fluxbeam = { path = "decoder/fluxbeam" }
+solana-indexer-decoding-gavel = { path = "decoder/gavel" }
 solana-indexer-decoding-jupiter-dca = { path = "decoder/jupiter-dca" }
-solana-indexer-decoding-jupiter-limit-order-2 = { path = "decoder/jupiter-limit-order-2" }
 solana-indexer-decoding-jupiter-limit-order = { path = "decoder/jupiter-limit-order" }
+solana-indexer-decoding-jupiter-limit-order-2 = { path = "decoder/jupiter-limit-order-2" }
 solana-indexer-decoding-jupiter-perpetuals = { path = "decoder/jupiter-perpetuals" }
 solana-indexer-decoding-jupiter-swap = { path = "decoder/jupiter-swap" }
+solana-indexer-decoding-kamino-farms = { path = "decoder/kamino-farms" }
 solana-indexer-decoding-kamino-lending = { path = "decoder/kamino-lending" }
+solana-indexer-decoding-kamino-limit-order = { path = "decoder/kamino-limit-order" }
 solana-indexer-decoding-kamino-vault = { path = "decoder/kamino-vault" }
 solana-indexer-decoding-lifinity-amm-v2 = { path = "decoder/lifinity-amm-v2" }
+solana-indexer-decoding-marginfi-v2 = { path = "decoder/marginfi-v2" }
+solana-indexer-decoding-marinade-finance = { path = "decoder/marinade-finance" }
 solana-indexer-decoding-memo-program = { path = "decoder/memo-program" }
+solana-indexer-decoding-meteora-damm-v2 = { path = "decoder/meteora-damm-v2" }
 solana-indexer-decoding-meteora-dlmm = { path = "decoder/meteora-dlmm" }
+solana-indexer-decoding-meteora-pools = { path = "decoder/meteora-pools" }
 solana-indexer-decoding-moonshot = { path = "decoder/moonshot" }
 solana-indexer-decoding-mpl-core = { path = "decoder/mpl-core" }
 solana-indexer-decoding-mpl-token-metadata = { path = "decoder/mpl-token-metadata" }
@@ -89,26 +118,45 @@ solana-indexer-decoding-okx-dex = { path = "decoder/okx-dex" }
 solana-indexer-decoding-openbook-v2 = { path = "decoder/openbook-v2" }
 solana-indexer-decoding-orca-whirlpool = { path = "decoder/orca-whirlpool" }
 solana-indexer-decoding-phoenix-v1 = { path = "decoder/phoenix-v1" }
+solana-indexer-decoding-pump-swap = { path = "decoder/pump-swap" }
 solana-indexer-decoding-pumpfun = { path = "decoder/pumpfun" }
 solana-indexer-decoding-raydium-amm-v4 = { path = "decoder/raydium-amm-v4" }
 solana-indexer-decoding-raydium-clmm = { path = "decoder/raydium-clmm" }
 solana-indexer-decoding-raydium-cpmm = { path = "decoder/raydium-cpmm" }
+solana-indexer-decoding-raydium-launchpad = { path = "decoder/raydium-launchpad" }
 solana-indexer-decoding-raydium-liquidity-locking = { path = "decoder/raydium-liquidity-locking" }
 solana-indexer-decoding-sharky = { path = "decoder/sharky" }
-solana-indexer-decoding-spl-associated-token-account = { path = "decoder/spl-associated-token-account" }
+solana-indexer-decoding-solayer-restaking-program = { path = "decoder/solayer-restaking-program" }
 solana-indexer-decoding-stabble-stable-swap = { path = "decoder/stabble-stable-swap" }
 solana-indexer-decoding-stabble-weighted-swap = { path = "decoder/stabble-weighted-swap" }
 solana-indexer-decoding-stake-program = { path = "decoder/stake-program" }
 solana-indexer-decoding-system-program = { path = "decoder/system-program" }
 solana-indexer-decoding-token-2022 = { path = "decoder/token-2022" }
 solana-indexer-decoding-token-program = { path = "decoder/token-program" }
+solana-indexer-decoding-virtual-curve = { path = "decoder/virtual-curve" }
+solana-indexer-decoding-virtuals = { path = "decoder/virtuals" }
 solana-indexer-decoding-zeta = { path = "decoder/zeta" }
 
 # solana
-solana-account-decoder = "=2.1.11"
-solana-client = "=2.1.11"
-solana-sdk = "=2.1.11"
-solana-transaction-status = "=2.1.11"
+solana-account-decoder = "=2.2.17"
+solana-account-decoder-client-types = "=2.2.17"
+solana-client = "=2.2.17"
+solana-entry = "=2.2.17"
+solana-transaction-status = "=2.2.17"
+solana-transaction-context = "=2.2.17"
+
+solana-account = "2.2"
+solana-clock = "2.2"
+solana-commitment-config = "2.2"
+solana-hash = "2.2"
+solana-instruction = { version = "2.2", default-features = false }
+solana-message = "2.2"
+solana-native-token = "2.2"
+solana-program = "2.2"
+solana-program-pack = "2.2"
+solana-pubkey = { version = "2.2", features = ["serde", "borsh", "curve25519"] }
+solana-signature = { version = "2.2", features = ["rand"] }
+solana-transaction = "2.2"
 spl-memo = "5.0.0"
 spl-token = "6.0.0"
 
@@ -117,11 +165,13 @@ anyhow = "1.0.96"
 askama = "0.12.1"
 async-stream = "0.3.6"
 async-trait = { version = "0.1.86" }
+axum = "0.8.4"
 base64 = "0.22.1"
 bincode = "1.3.3"
 borsh = { version = "1.5.1" }
 borsh-derive-internal = "0.10.3"
-bs58 = "0.5.1"
+bs58 = { version = "0.5.1", default-features = false }
+chrono = { version = "0.4.40", features = ["serde"] }
 clap = { version = "4.5.30", features = ["derive"] }
 console = "0.15.8"
 dialoguer = { version = "0.11.0", default-features = false, features = ["editor"] }
@@ -134,27 +184,51 @@ heck = "0.5.0"
 hex = "0.4.3"
 indicatif = "0.17.8"
 inquire = "0.7.5"
+juniper = { version = "0.16.1", features = ["uuid"] }
+juniper_axum = { version = "0.2.0" }
+juniper_codegen = { version = "0.16.0" }
+juniper_graphql_ws = { version = "0.4.0", features = ["graphql-transport-ws"] }
 log = "0.4.25"
 metrics = "0.24.1"
 metrics-exporter-prometheus = "0.16.0"
 paste = "1.0.15"
 proc-macro2 = "1"
+prost = "0.12"
+prost-types = "0.12"
 quote = "1.0"
 retry = "2.0.0"
+rust_decimal = { version = "1.36.0", features = ["db-postgres"] }
 serde = { version = "1.0.208", features = ["derive"] }
 serde-big-array = "0.5.1"
 serde_json = "1.0.138"
 sha2 = "0.10.8"
+sqlx = { version = "0.8.5", features = [
+    "macros",
+    "runtime-tokio-rustls",
+    "postgres",
+    "uuid",
+    "chrono",
+    "rust_decimal",
+] }
+sqlx_migrator = { version = "0.17.0", features = ["postgres"] }
 syn = { version = "1.0", features = ["full"] }
-thiserror = "1.0.63"
-tokio = { version = "1.43.0" }
+thiserror = { version = "2.0.12", default-features = false }
+tokio = { version = "1.43.0", features = ["rt", "time", "signal", "macros"] }
 tokio-retry = "0.3.0"
 tokio-util = "0.7.13"
+tonic = { version = "0.10", features = ["tls", "tls-roots", "tls-webpki-roots"] }
+tonic-build = "0.10"
 unicode-xid = "0.2"
+uuid = { version = "1.6.1", features = ["serde", "v7"] }
 
-solana-grpc-client = { git = "https://github.com/nabob-labs/solana-grpc.git", branch = "stable", version = "2.1.11" }
-solana-grpc-proto = { git = "https://github.com/nabob-labs/solana-grpc.git", branch = "stable", version = "2.1.11" }
+solana-grpc-client = { git = "https://github.com/nabob-labs/solana-grpc.git", tag = "v2.2.17", version = "2.2.17" }
+solana-grpc-proto = { git = "https://github.com/nabob-labs/solana-grpc.git", tag = "v2.2.17", version = "2.2.17" }
 
-[patch.crates-io.curve25519-dalek]
-git = "https://github.com/anza-xyz/curve25519-dalek.git"
-rev = "b500cdc2a920cd5bff9e2dd974d7b97349d61464"
+[patch.crates-io]
+curve25519-dalek = { git = "https://github.com/anza-xyz/curve25519-dalek.git" , rev = "b500cdc2a920cd5bff9e2dd974d7b97349d61464" }
+solana-account-decoder = { git = "https://github.com/nabob-labs/solana-spe.git", tag = "v2.2.17", version = "2.2.17" }
+solana-account-decoder-client-types = { git = "https://github.com/nabob-labs/solana-spe.git", tag = "v2.2.17", version = "2.2.17" }
+solana-client = { git = "https://github.com/nabob-labs/solana-spe.git", tag = "v2.2.17", version = "2.2.17" }
+solana-entry = { git = "https://github.com/nabob-labs/solana-spe.git", tag = "v2.2.17", version = "2.2.17" }
+solana-transaction-status = { git = "https://github.com/nabob-labs/solana-spe.git", tag = "v2.2.17", version = "2.2.17" }
+solana-transaction-context = { git = "https://github.com/nabob-labs/solana-spe.git", tag = "v2.2.17", version = "2.2.17" }

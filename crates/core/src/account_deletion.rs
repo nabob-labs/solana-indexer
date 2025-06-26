@@ -35,7 +35,13 @@ use {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use solana_indexer_core::error::IndexerResult;
+/// use solana_indexer_core::metrics::MetricsCollection;
+/// use solana_indexer_core::datasource::AccountDeletion;
+/// use solana_indexer_core::processor::Processor;
+/// use async_trait::async_trait;
+/// use std::sync::Arc;
 ///
 /// struct MyAccountDeletionProcessor;
 ///
@@ -89,7 +95,13 @@ pub struct AccountDeletionPipe {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use solana_indexer_core::metrics::MetricsCollection;
+/// use std::sync::Arc;
+/// use solana_indexer_core::error::IndexerResult;
+/// use solana_indexer_core::datasource::AccountDeletion;
+/// use solana_indexer_core::account_deletion::AccountDeletionPipe;
+/// use async_trait::async_trait;
 ///
 /// struct MyAccountDeletionPipe;
 ///

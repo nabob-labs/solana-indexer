@@ -12,14 +12,20 @@ default = ["macros"]
 macros = ["solana-indexer-macros", "solana-indexer-proc-macros"]
 
 [dependencies]
-solana-client = { workspace = true }
-solana-sdk = { workspace = true }
+solana-account = { workspace = true }
+solana-hash = { workspace = true }
+solana-instruction = { workspace = true, default-features = false }
+solana-message = { workspace = true }
+solana-program = { workspace = true }
+solana-pubkey = { workspace = true }
+solana-signature = { workspace = true }
+solana-transaction = { workspace = true }
+solana-transaction-context = { workspace = true }
 solana-transaction-status = { workspace = true }
 
 async-trait = { workspace = true }
 borsh = { version = "0.10.4" }
 bs58 = { workspace = true }
-futures = { workspace = true }
 log = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -33,3 +39,7 @@ solana-indexer-proc-macros = { workspace = true, optional = true }
 
 [lib]
 crate-type = ["rlib"]
+
+[dev-dependencies]
+#solana-indexer-test-utils = { workspace = true }
+solana-account-decoder-client-types = { workspace = true }

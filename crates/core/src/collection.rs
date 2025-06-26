@@ -3,7 +3,7 @@
 //!
 //! This module defines the `InstructionDecoderCollection` trait, which enables
 //! decoding of Solana `Instruction` objects into structured types, allowing for
-//! streamlined processing of instructions in a `indexer-core` pipeline. The
+//! streamlined processing of instructions in a `solana-indexer-core` pipeline. The
 //! trait abstracts the decoding logic, providing an easy way to parse various
 //! instruction types and retrieve their corresponding metadata for further
 //! processing.
@@ -46,7 +46,7 @@ use {crate::instruction::DecodedInstruction, serde::Serialize};
 ///
 /// The `InstructionDecoderCollection` trait provides an interface for decoding
 /// Solana `Instruction` objects into custom types that can be processed within
-/// the `indexer-core` pipeline. This trait requires implementing methods to
+/// the `solana-indexer-core` pipeline. This trait requires implementing methods to
 /// parse instructions and retrieve associated instruction types, allowing for
 /// flexible handling of different instruction variants in a single collection.
 ///
@@ -67,7 +67,7 @@ use {crate::instruction::DecodedInstruction, serde::Serialize};
 /// pipeline according to application-specific logic.
 ///
 /// - **Parameters**:
-///   - `instruction`: A reference to a `solana_sdk::instruction::Instruction`,
+///   - `instruction`: A reference to a `solana_instruction::Instruction`,
 ///     representing the raw instruction to be decoded.
 /// - **Returns**: An `Option<DecodedInstruction<Self>>` containing the decoded
 ///   instruction if successful, or `None` if parsing fails or the instruction
@@ -97,7 +97,7 @@ pub trait InstructionDecoderCollection:
     type InstructionType: Clone + std::fmt::Debug + PartialEq + Eq + Send + Sync + 'static;
 
     fn parse_instruction(
-        instruction: &solana_sdk::instruction::Instruction,
+        instruction: &solana_instruction::Instruction,
     ) -> Option<DecodedInstruction<Self>>;
     fn get_type(&self) -> Self::InstructionType;
 }

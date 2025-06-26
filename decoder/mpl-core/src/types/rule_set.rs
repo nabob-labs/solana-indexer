@@ -5,6 +5,6 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 )]
 pub enum RuleSet {
     None,
-    ProgramAllowList(Vec<solana_sdk::pubkey::Pubkey>),
-    ProgramDenyList(Vec<solana_sdk::pubkey::Pubkey>),
+    ProgramAllowList(Vec<solana_pubkey::Pubkey>),
+    ProgramDenyList(Vec<solana_pubkey::Pubkey>),
 }

@@ -10,8 +10,22 @@ edition.workspace = true
 [lib]
 crate-type = ["rlib"]
 
+[features]
+postgres = ["dep:sqlx", "dep:sqlx_migrator", "dep:solana-indexer-postgres-client", "dep:rust_decimal"]
+graphql = ["dep:solana-indexer-gql-server", "dep:juniper"]
+
 [dependencies]
+async-trait = { workspace = true }
 solana-indexer-core = { workspace = true }
+solana-indexer-gql-server = { workspace = true, optional = true }
+solana-indexer-postgres-client = { workspace = true, optional = true }
+juniper = { workspace = true, optional = true }
+rust_decimal = { workspace = true, optional = true }
 serde = { workspace = true }
-solana-sdk = { workspace = true }
+solana-account = { workspace = true }
+solana-instruction = { workspace = true, default-features = false }
+solana-program-pack = { workspace = true }
+solana-pubkey = { workspace = true }
 spl-token = { workspace = true }
+sqlx = { workspace = true, optional = true }
+sqlx_migrator = { workspace = true, optional = true }

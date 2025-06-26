@@ -7,18 +7,18 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct CloseAccounts {}
 
 pub struct CloseAccountsInstructionAccounts {
-    pub metadata: solana_sdk::pubkey::Pubkey,
-    pub edition: solana_sdk::pubkey::Pubkey,
-    pub mint: solana_sdk::pubkey::Pubkey,
-    pub authority: solana_sdk::pubkey::Pubkey,
-    pub destination: solana_sdk::pubkey::Pubkey,
+    pub metadata: solana_pubkey::Pubkey,
+    pub edition: solana_pubkey::Pubkey,
+    pub mint: solana_pubkey::Pubkey,
+    pub authority: solana_pubkey::Pubkey,
+    pub destination: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for CloseAccounts {
     type ArrangedAccounts = CloseAccountsInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [metadata, edition, mint, authority, destination, _remaining @ ..] = accounts else {
             return None;

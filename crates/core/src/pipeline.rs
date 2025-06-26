@@ -1,7 +1,7 @@
 //! Defines the `Pipeline` struct and related components for processing
 //! blockchain data updates.
 //!
-//! The `Pipeline` module is central to the `indexer-core` framework, offering a
+//! The `Pipeline` module is central to the `solana-indexer-core` framework, offering a
 //! flexible and extensible data processing architecture that supports various
 //! blockchain data types, including account updates, transaction details, and
 //! account deletions. The pipeline integrates multiple data sources and
@@ -50,6 +50,8 @@
 //! - Proper metric collection and flushing are essential for monitoring
 //!   pipeline performance, especially in production environments.
 
+use crate::block_details::{BlockDetailsPipe, BlockDetailsPipes};
+use crate::datasource::BlockDetails;
 use {
     crate::{
         account::{
@@ -106,7 +108,16 @@ pub enum ShutdownStrategy {
     ProcessPending,
 }
 
-/// Represents the primary data processing pipeline in the `indexer-core`
+/// The default size of the channel buffer for the pipeline.
+///
+/// This constant defines the default number of updates that can be queued in
+/// the pipeline's channel buffer. It is used as a fallback value if the
+/// `channel_buffer_size` is not explicitly set during pipeline construction.
+///
+/// The default size is 10,000 updates, which provides a reasonable balance
+pub const DEFAULT_CHANNEL_BUFFER_SIZE: usize = 1_000;
+
+/// Represents the primary data processing pipeline in the `solana-indexer-core`
 /// framework.
 ///
 /// The `Pipeline` struct is responsible for orchestrating the flow of data from
@@ -144,6 +155,8 @@ pub enum ShutdownStrategy {
 ///   account updates.
 /// - `account_deletion_pipes`: A vector of `AccountDeletionPipes` to handle
 ///   deletion events.
+/// - `block_details_pipes`: A vector of `BlockDetailsPipes` to handle
+///   block details.
 /// - `instruction_pipes`: A vector of `InstructionPipes` for processing
 ///   instructions within transactions. These pipes work with nested
 ///   instructions and are generically defined to support varied instruction
@@ -156,10 +169,13 @@ pub enum ShutdownStrategy {
 /// - `metrics_flush_interval`: An optional interval, in seconds, defining how
 ///   frequently metrics should be flushed. If `None`, the default interval is
 ///   used.
+/// - `channel_buffer_size`: The size of the channel buffer for the pipeline. If
+///   not set, a default size of 10_000 will be used.
 ///
 /// ## Example
 ///
-/// ```rust
+/// ```ignore
+/// use std::sync::Arc;
 ///
 /// solana_indexer_core::pipeline::Pipeline::builder()
 /// .datasource(transaction_crawler)
@@ -175,6 +191,7 @@ pub enum ShutdownStrategy {
 /// )
 /// .transaction(TEST_SCHEMA.clone(), TestProgramTransactionProcessor)
 /// .account_deletions(TestProgramAccountDeletionProcessor)
+/// .channel_buffer_size(1000)
 /// .build()?
 /// .run()
 /// .await?;
@@ -193,11 +210,14 @@ pub struct Pipeline {
     pub datasources: Vec<Arc<dyn Datasource + Send + Sync>>,
     pub account_pipes: Vec<Box<dyn AccountPipes>>,
     pub account_deletion_pipes: Vec<Box<dyn AccountDeletionPipes>>,
+    pub block_details_pipes: Vec<Box<dyn BlockDetailsPipes>>,
     pub instruction_pipes: Vec<Box<dyn for<'a> InstructionPipes<'a>>>,
     pub transaction_pipes: Vec<Box<dyn for<'a> TransactionPipes<'a>>>,
     pub metrics: Arc<MetricsCollection>,
     pub metrics_flush_interval: Option<u64>,
+    pub datasource_cancellation_token: Option<CancellationToken>,
     pub shutdown_strategy: ShutdownStrategy,
+    pub channel_buffer_size: usize,
 }
 
 impl Pipeline {
@@ -211,7 +231,9 @@ impl Pipeline {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
+    /// use std::sync::Arc;
+    ///
     /// solana_indexer_core::pipeline::Pipeline::builder()
     /// .datasource(transaction_crawler)
     /// .metrics(Arc::new(LogMetrics::new()))
@@ -219,7 +241,7 @@ impl Pipeline {
     /// .instruction(
     ///    TestProgramDecoder,
     ///    TestProgramProcessor
-    /// )
+    /// );
     /// // ...
     /// ```
     ///
@@ -234,11 +256,14 @@ impl Pipeline {
             datasources: Vec::new(),
             account_pipes: Vec::new(),
             account_deletion_pipes: Vec::new(),
+            block_details_pipes: Vec::new(),
             instruction_pipes: Vec::new(),
             transaction_pipes: Vec::new(),
             metrics: MetricsCollection::default(),
             metrics_flush_interval: None,
+            datasource_cancellation_token: None,
             shutdown_strategy: ShutdownStrategy::default(),
+            channel_buffer_size: DEFAULT_CHANNEL_BUFFER_SIZE,
         }
     }
 
@@ -274,8 +299,8 @@ impl Pipeline {
     ///
     /// # Example
     ///
-    /// ```rust
-    /// use solana_indexer_core::Pipeline;
+    /// ```ignore
+    /// use solana_indexer_core::pipeline::Pipeline;
     ///
     /// let mut pipeline = Pipeline::builder()
     ///     .datasource(MyDatasource::new())
@@ -312,9 +337,13 @@ impl Pipeline {
         log::trace!("run(self)");
 
         self.metrics.initialize_metrics().await?;
-        let (update_sender, mut update_receiver) = tokio::sync::mpsc::unbounded_channel::<Update>();
+        let (update_sender, mut update_receiver) =
+            tokio::sync::mpsc::channel::<Update>(self.channel_buffer_size);
 
-        let datasource_cancellation_token = CancellationToken::new();
+        let datasource_cancellation_token = self
+            .datasource_cancellation_token
+            .clone()
+            .unwrap_or_default();
 
         for datasource in &self.datasources {
             let datasource_cancellation_token_clone = datasource_cancellation_token.clone();
@@ -325,7 +354,7 @@ impl Pipeline {
             tokio::spawn(async move {
                 if let Err(e) = datasource_clone
                     .consume(
-                        &sender_clone,
+                        sender_clone,
                         datasource_cancellation_token_clone,
                         metrics_collection,
                     )
@@ -335,6 +364,8 @@ impl Pipeline {
                 }
             });
         }
+
+        drop(update_sender);
 
         let mut interval = tokio::time::interval(time::Duration::from_secs(
             self.metrics_flush_interval.unwrap_or(5),
@@ -489,11 +520,11 @@ impl Pipeline {
                     .await?;
             }
             Update::Transaction(transaction_update) => {
-                let transaction_metadata = &(*transaction_update).clone().try_into()?;
+                let transaction_metadata = Arc::new((*transaction_update).clone().try_into()?);
 
                 let instructions_with_metadata: InstructionsWithMetadata =
                     transformers::extract_instructions_with_metadata(
-                        transaction_metadata,
+                        &transaction_metadata,
                         &transaction_update,
                     )?;
 
@@ -526,6 +557,16 @@ impl Pipeline {
 
                 self.metrics
                     .increment_counter("account_deletions_processed", 1)
+                    .await?;
+            }
+            Update::BlockDetails(block_details) => {
+                for pipe in self.block_details_pipes.iter_mut() {
+                    pipe.run(block_details.clone(), self.metrics.clone())
+                        .await?;
+                }
+
+                self.metrics
+                    .increment_counter("block_details_processed", 1)
                     .await?;
             }
         };
@@ -563,7 +604,9 @@ impl Pipeline {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use std::sync::Arc;
+///
 /// solana_indexer_core::pipeline::Pipeline::builder()
 /// .datasource(transaction_crawler)
 /// .metrics(Arc::new(LogMetrics::new()))
@@ -571,7 +614,7 @@ impl Pipeline {
 /// .instruction(
 ///    TestProgramDecoder,
 ///    TestProgramProcessor
-/// )
+/// );
 /// // ...
 /// ```
 ///
@@ -591,6 +634,11 @@ impl Pipeline {
 ///   performance.
 /// - `metrics_flush_interval`: An optional interval (in seconds) for flushing
 ///   metrics data. If not set, a default flush interval will be used.
+/// - `datasource_cancellation_token`: An optional `CancellationToken` for
+///   canceling datasource. If not set, a default `CancellationToken` will be
+///   used.
+/// - `channel_buffer_size`: The size of the channel buffer for the pipeline. If
+///   not set, a default size of 10_000 will be used.
 ///
 /// # Returns
 ///
@@ -609,11 +657,14 @@ pub struct PipelineBuilder {
     pub datasources: Vec<Arc<dyn Datasource + Send + Sync>>,
     pub account_pipes: Vec<Box<dyn AccountPipes>>,
     pub account_deletion_pipes: Vec<Box<dyn AccountDeletionPipes>>,
+    pub block_details_pipes: Vec<Box<dyn BlockDetailsPipes>>,
     pub instruction_pipes: Vec<Box<dyn for<'a> InstructionPipes<'a>>>,
     pub transaction_pipes: Vec<Box<dyn for<'a> TransactionPipes<'a>>>,
     pub metrics: MetricsCollection,
     pub metrics_flush_interval: Option<u64>,
+    pub datasource_cancellation_token: Option<CancellationToken>,
     pub shutdown_strategy: ShutdownStrategy,
+    pub channel_buffer_size: usize,
 }
 
 impl PipelineBuilder {
@@ -629,6 +680,8 @@ impl PipelineBuilder {
     /// # Example
     ///
     /// ```rust
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
     /// let builder = PipelineBuilder::new();
     /// ```
     pub fn new() -> Self {
@@ -649,7 +702,9 @@ impl PipelineBuilder {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
     /// let builder = PipelineBuilder::new()
     ///     .datasource(MyDatasource::new());
     /// ```
@@ -704,7 +759,9 @@ impl PipelineBuilder {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
     /// let builder = PipelineBuilder::new()
     ///     .account(MyAccountDecoder, MyAccountProcessor);
     /// ```
@@ -736,7 +793,9 @@ impl PipelineBuilder {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
     /// let builder = PipelineBuilder::new()
     ///     .account_deletions(MyAccountDeletionProcessor);
     /// ```
@@ -755,6 +814,37 @@ impl PipelineBuilder {
         self
     }
 
+    /// Adds a block details pipe to handle block details updates.
+    ///
+    /// Block details pipes process updates related to block metadata, such as
+    /// slot, block hash, and rewards, with a `Processor` to handle the updates.
+    ///
+    /// # Parameters
+    ///
+    /// - `processor`: A `Processor` that processes block details updates.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
+    /// let builder = PipelineBuilder::new()
+    ///     .block_details(MyBlockDetailsProcessor);
+    /// ```
+    pub fn block_details(
+        mut self,
+        processor: impl Processor<InputType = BlockDetails> + Send + Sync + 'static,
+    ) -> Self {
+        log::trace!(
+            "block_details(self, processor: {:?})",
+            stringify!(processor)
+        );
+        self.block_details_pipes.push(Box::new(BlockDetailsPipe {
+            processor: Box::new(processor),
+        }));
+        self
+    }
+
     /// Adds an instruction pipe to process instructions within transactions.
     ///
     /// Instruction pipes decode and process individual instructions,
@@ -768,7 +858,9 @@ impl PipelineBuilder {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
     /// let builder = PipelineBuilder::new()
     ///     .instruction(MyDecoder, MyInstructionProcessor);
     /// ```
@@ -803,7 +895,9 @@ impl PipelineBuilder {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
     /// let builder = PipelineBuilder::new()
     ///     .transaction(MY_SCHEMA.clone(), MyTransactionProcessor);
     /// ```
@@ -841,7 +935,10 @@ impl PipelineBuilder {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
+    /// use std::sync::Arc;
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
     /// let builder = PipelineBuilder::new()
     ///     .metrics(Arc::new(LogMetrics::new()));
     /// ```
@@ -863,12 +960,65 @@ impl PipelineBuilder {
     /// # Example
     ///
     /// ```rust
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
     /// let builder = PipelineBuilder::new()
     ///     .metrics_flush_interval(60);
     /// ```
     pub fn metrics_flush_interval(mut self, interval: u64) -> Self {
         log::trace!("metrics_flush_interval(self, interval: {:?})", interval);
         self.metrics_flush_interval = Some(interval);
+        self
+    }
+
+    /// Sets the cancellation token for cancelling datasource on demand.
+    ///
+    /// This value is used to cancel datasource on demand.
+    /// If not set, a default `CancellationToken` is used.
+    ///
+    /// # Parameters
+    ///
+    /// - `cancellation_token`: An instance of `CancellationToken`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    /// use tokio_util::sync::CancellationToken;
+    ///
+    /// let builder = PipelineBuilder::new()
+    ///     .datasource_cancellation_token(CancellationToken::new());
+    /// ```
+    pub fn datasource_cancellation_token(mut self, cancellation_token: CancellationToken) -> Self {
+        log::trace!(
+            "datasource_cancellation_token(self, cancellation_token: {:?})",
+            cancellation_token
+        );
+        self.datasource_cancellation_token = Some(cancellation_token);
+        self
+    }
+
+    /// Sets the size of the channel buffer for the pipeline.
+    ///
+    /// This value defines the maximum number of updates that can be queued in
+    /// the pipeline's channel buffer. If not set, a default size of 10_000
+    /// will be used.
+    ///
+    /// # Parameters
+    ///
+    /// - `size`: The size of the channel buffer for the pipeline.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use solana_indexer_core::pipeline::PipelineBuilder;
+    ///
+    /// let builder = PipelineBuilder::new()
+    ///     .channel_buffer_size(1000);
+    /// ```
+    pub fn channel_buffer_size(mut self, size: usize) -> Self {
+        log::trace!("channel_buffer_size(self, size: {:?})", size);
+        self.channel_buffer_size = size;
         self
     }
 
@@ -886,7 +1036,9 @@ impl PipelineBuilder {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
+    /// use std::sync::Arc;
+    ///
     /// solana_indexer_core::pipeline::Pipeline::builder()
     /// .datasource(transaction_crawler)
     /// .metrics(Arc::new(LogMetrics::new()))
@@ -901,7 +1053,10 @@ impl PipelineBuilder {
     /// )
     /// .transaction(TEST_SCHEMA.clone(), TestProgramTransactionProcessor)
     /// .account_deletions(TestProgramAccountDeletionProcessor)
-    /// .build()?
+    /// .channel_buffer_size(1000)
+    /// .build()?;
+    ///
+    ///  Ok(())
     /// ```
     pub fn build(self) -> IndexerResult<Pipeline> {
         log::trace!("build(self)");
@@ -909,11 +1064,14 @@ impl PipelineBuilder {
             datasources: self.datasources,
             account_pipes: self.account_pipes,
             account_deletion_pipes: self.account_deletion_pipes,
+            block_details_pipes: self.block_details_pipes,
             instruction_pipes: self.instruction_pipes,
             transaction_pipes: self.transaction_pipes,
             shutdown_strategy: self.shutdown_strategy,
             metrics: Arc::new(self.metrics),
             metrics_flush_interval: self.metrics_flush_interval,
+            datasource_cancellation_token: self.datasource_cancellation_token,
+            channel_buffer_size: self.channel_buffer_size,
         })
     }
 }

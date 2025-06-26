@@ -5,18 +5,18 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 )]
 #[indexer(discriminator = "0x19")]
 pub struct InitializeMintCloseAuthority {
-    pub close_authority: Option<solana_sdk::pubkey::Pubkey>,
+    pub close_authority: Option<solana_pubkey::Pubkey>,
 }
 
 pub struct InitializeMintCloseAuthorityInstructionAccounts {
-    pub mint: solana_sdk::pubkey::Pubkey,
+    pub mint: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializeMintCloseAuthority {
     type ArrangedAccounts = InitializeMintCloseAuthorityInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [mint, _remaining @ ..] = accounts else {
             return None;

@@ -7,16 +7,16 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct UpdateSecondaryAdmin {}
 
 pub struct UpdateSecondaryAdminInstructionAccounts {
-    pub state: solana_sdk::pubkey::Pubkey,
-    pub admin: solana_sdk::pubkey::Pubkey,
-    pub new_admin: solana_sdk::pubkey::Pubkey,
+    pub state: solana_pubkey::Pubkey,
+    pub admin: solana_pubkey::Pubkey,
+    pub new_admin: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for UpdateSecondaryAdmin {
     type ArrangedAccounts = UpdateSecondaryAdminInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [state, admin, new_admin, _remaining @ ..] = accounts else {
             return None;

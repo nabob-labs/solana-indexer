@@ -7,19 +7,19 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct CreateOpenOrders {}
 
 pub struct CreateOpenOrdersInstructionAccounts {
-    pub open_orders: solana_sdk::pubkey::Pubkey,
-    pub payer: solana_sdk::pubkey::Pubkey,
-    pub dex_program: solana_sdk::pubkey::Pubkey,
-    pub system_program: solana_sdk::pubkey::Pubkey,
-    pub rent: solana_sdk::pubkey::Pubkey,
-    pub market: solana_sdk::pubkey::Pubkey,
+    pub open_orders: solana_pubkey::Pubkey,
+    pub payer: solana_pubkey::Pubkey,
+    pub dex_program: solana_pubkey::Pubkey,
+    pub system_program: solana_pubkey::Pubkey,
+    pub rent: solana_pubkey::Pubkey,
+    pub market: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for CreateOpenOrders {
     type ArrangedAccounts = CreateOpenOrdersInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [open_orders, payer, dex_program, system_program, rent, market, _remaining @ ..] =
             accounts

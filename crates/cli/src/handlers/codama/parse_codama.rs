@@ -14,7 +14,7 @@ use {
     },
     anyhow::{bail, Result},
     askama::Template,
-    heck::{ToKebabCase, ToSnakeCase, ToSnekCase, ToUpperCamelCase},
+    heck::{ToKebabCase, ToSnakeCase, ToUpperCamelCase},
     std::fs::{self},
 };
 
@@ -55,14 +55,14 @@ pub fn parse_codama(
 
     let crate_dir = if output.ends_with("/") {
         if as_crate {
-            format!("{}{}-decoder", output, decoder_name_kebab)
+            format!("{}{}", output, decoder_name_kebab)
         } else {
-            format!("{}{}_decoder", output, program_name.to_snek_case())
+            format!("{}{}", output, program_name.to_snake_case())
         }
     } else if as_crate {
-        format!("{}/{}-decoder", output, decoder_name_kebab)
+        format!("{}/{}", output, decoder_name_kebab)
     } else {
-        format!("{}/{}_decoder", output, program_name.to_snek_case())
+        format!("{}/{}", output, program_name.to_snake_case())
     };
 
     fs::create_dir_all(&crate_dir).expect("Failed to create decoder directory");
@@ -89,13 +89,15 @@ pub fn parse_codama(
 
     for type_data in &types_data {
         let template = TypeStructTemplate { type_data };
-        let rendered = template.render().unwrap();
+        let rendered = template
+            .render()
+            .expect("Failed to render type struct template");
         let filename = format!("{}/{}.rs", types_dir, type_data.name.to_snake_case());
         fs::write(&filename, rendered).expect("Failed to write type struct file");
         println!("Generated {}", filename);
     }
 
-    let mut types_mod_content = types_data
+    let types_mod_content = types_data
         .iter()
         .map(|type_data| {
             format!(
@@ -106,10 +108,6 @@ pub fn parse_codama(
         })
         .collect::<Vec<_>>()
         .join("\n");
-
-    if needs_big_array {
-        types_mod_content.push_str("\nuse serde_big_array::BigArray;\n");
-    }
 
     let types_mod_filename = format!("{}/mod.rs", types_dir);
     fs::write(&types_mod_filename, types_mod_content).expect("Failed to write types mod file");
@@ -122,7 +120,9 @@ pub fn parse_codama(
 
     for account in &accounts_data {
         let template = AccountsStructTemplate { account };
-        let rendered = template.render().unwrap();
+        let rendered = template
+            .render()
+            .expect("Failed to render account struct template");
         let filename = format!("{}/{}.rs", accounts_dir, account.module_name);
         fs::write(&filename, rendered).expect("Failed to write account struct file");
         println!("Generated {}", filename);
@@ -133,7 +133,9 @@ pub fn parse_codama(
         decoder_name: decoder_name.clone(),
         program_struct_name: program_struct_name.clone(),
     };
-    let accounts_mod_rendered = accounts_mod_template.render().unwrap();
+    let accounts_mod_rendered = accounts_mod_template
+        .render()
+        .expect("Failed to render accounts mod template");
     let accounts_mod_filename = format!("{}/mod.rs", accounts_dir);
 
     fs::write(&accounts_mod_filename, accounts_mod_rendered)
@@ -147,7 +149,9 @@ pub fn parse_codama(
 
     for instruction in &instructions_data {
         let template = InstructionsStructTemplate { instruction };
-        let rendered = template.render().unwrap();
+        let rendered = template
+            .render()
+            .expect("Failed to render instruction struct template");
         let filename = format!("{}/{}.rs", instructions_dir, instruction.module_name);
         fs::write(&filename, rendered).expect("Failed to write instruction struct file");
         println!("Generated {}", filename);
@@ -155,7 +159,9 @@ pub fn parse_codama(
 
     for event in &events_data {
         let template = EventsStructTemplate { event };
-        let rendered = template.render().unwrap();
+        let rendered = template
+            .render()
+            .expect("Failed to render event struct template");
         let filename = format!("{}/{}.rs", instructions_dir, event.module_name);
         fs::write(&filename, rendered).expect("Failed to write event struct file");
         println!("Generated {}", filename);
@@ -167,7 +173,9 @@ pub fn parse_codama(
         program_instruction_enum: program_instruction_enum.clone(),
         events: &events_data,
     };
-    let instructions_mod_rendered = instructions_mod_template.render().unwrap();
+    let instructions_mod_rendered = instructions_mod_template
+        .render()
+        .expect("Failed to render instructions mod template");
     let instructions_mod_filename = format!("{}/mod.rs", instructions_dir);
 
     fs::write(&instructions_mod_filename, instructions_mod_rendered)
@@ -186,8 +194,8 @@ pub fn parse_codama(
 
         let cargo_toml_content = format!(
             r#"[package]
-name = "{decoder_name_kebab}-decoder"
-version = "0.1.4"
+name = "solana-indexer-decoding-{decoder_name_kebab}"
+version = "2.2.17"
 edition = {{ workspace = true }}
 
 [lib]
@@ -197,7 +205,9 @@ crate-type = ["rlib"]
 solana-indexer-core = {{ workspace = true }}
 solana-indexer-proc-macros = {{ workspace = true }}
 solana-indexer-macros = {{ workspace = true }}
-solana-sdk = {{ workspace = true }}
+solana-indexer-account = {{ workspace = true }}
+solana-indexer-instruction = {{ workspace = true }}
+solana-indexer-pubkey = {{ workspace = true }}
 serde = {{ workspace = true }}
 {big_array}
 "#,

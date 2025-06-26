@@ -1,6 +1,6 @@
 //! # Indexer Core
 //!
-//! `indexer-core` is a framework designed for building customizable and
+//! `solana-indexer-core` is a framework designed for building customizable and
 //! extensible indexers tailored to Solana blockchain data. It facilitates
 //! efficient data ingestion, transformation, and processing, supporting a wide
 //! range of use cases from transaction parsing to complex instruction analysis.
@@ -66,13 +66,14 @@
 //!
 //! ## Quick Start
 //!
-//! To create a new `indexer-core` pipeline, start by configuring data sources,
+//! To create a new `solana-indexer-core` pipeline, start by configuring data sources,
 //! processing pipes, and metrics in the [`pipeline::PipelineBuilder`]. Below is
 //! a basic example demonstrating how to set up a pipeline:
 //!
-//! ```rust
+//! ```ignore
+//! use std::sync::Arc;
 //!
-//!  solana_indexer_core::pipeline::Pipeline::builder()
+//! solana_indexer_core::pipeline::Pipeline::builder()
 //! .datasource(transaction_crawler)
 //! .metrics(Arc::new(LogMetrics::new()))
 //! .metrics(Arc::new(PrometheusMetrics::new()))
@@ -102,17 +103,18 @@
 //!
 //! ## Notes
 //!
-//! - `indexer-core` integrates with Solana's SDK, leveraging types and data
+//! - `solana-indexer-core` integrates with Solana's SDK, leveraging types and data
 //!   structures specific to the Solana blockchain.
 //! - This framework is designed for advanced use cases, such as blockchain
 //!   indexing, transaction monitoring, and custom data analysis.
 //!
 //! Explore each module in detail to understand their individual functions and
-//! to learn how to customize and extend `indexer-core` to suit your specific
+//! to learn how to customize and extend `solana-indexer-core` to suit your specific
 //! data processing requirements.
 
 pub mod account;
 pub mod account_deletion;
+mod block_details;
 pub mod collection;
 pub mod datasource;
 pub mod deserialize;
@@ -124,8 +126,12 @@ pub mod processor;
 pub mod schema;
 pub mod transaction;
 pub mod transformers;
+
 pub use borsh;
 #[cfg(feature = "macros")]
 pub use solana_indexer_macros::*;
 #[cfg(feature = "macros")]
 pub use solana_indexer_proc_macros::*;
+#[cfg(feature = "macros")]
+#[doc(hidden)]
+pub use log;

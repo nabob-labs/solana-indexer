@@ -5,9 +5,9 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 )]
 pub enum OrderBookType {
     Collection {
-        collection_key: solana_sdk::pubkey::Pubkey,
+        collection_key: solana_pubkey::Pubkey,
     },
     NFTList {
-        list_account: solana_sdk::pubkey::Pubkey,
+        list_account: solana_pubkey::Pubkey,
     },
 }

@@ -6,17 +6,18 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[indexer(discriminator = "0xafaf6d1f0d989bed")]
 pub struct Initialize {}
 
+#[derive(Debug, PartialEq, Eq, Clone, Hash, serde::Serialize, serde::Deserialize)]
 pub struct InitializeInstructionAccounts {
-    pub global: solana_sdk::pubkey::Pubkey,
-    pub user: solana_sdk::pubkey::Pubkey,
-    pub system_program: solana_sdk::pubkey::Pubkey,
+    pub global: solana_pubkey::Pubkey,
+    pub user: solana_pubkey::Pubkey,
+    pub system_program: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for Initialize {
     type ArrangedAccounts = InitializeInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [global, user, system_program, _remaining @ ..] = accounts else {
             return None;

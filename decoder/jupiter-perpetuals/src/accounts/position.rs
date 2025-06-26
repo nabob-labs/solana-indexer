@@ -5,10 +5,10 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(IndexerDeserialize, Debug)]
 #[indexer(discriminator = "0xaabc8fe47a40f7d0")]
 pub struct Position {
-    pub owner: solana_sdk::pubkey::Pubkey,
-    pub pool: solana_sdk::pubkey::Pubkey,
-    pub custody: solana_sdk::pubkey::Pubkey,
-    pub collateral_custody: solana_sdk::pubkey::Pubkey,
+    pub owner: solana_pubkey::Pubkey,
+    pub pool: solana_pubkey::Pubkey,
+    pub custody: solana_pubkey::Pubkey,
+    pub collateral_custody: solana_pubkey::Pubkey,
     pub open_time: i64,
     pub update_time: i64,
     pub side: Side,

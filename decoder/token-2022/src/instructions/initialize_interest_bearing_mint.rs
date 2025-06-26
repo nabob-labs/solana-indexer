@@ -6,19 +6,19 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[indexer(discriminator = "0x21")]
 pub struct InitializeInterestBearingMint {
     pub interest_bearing_mint_discriminator: u8,
-    pub rate_authority: Option<solana_sdk::pubkey::Pubkey>,
+    pub rate_authority: Option<solana_pubkey::Pubkey>,
     pub rate: i16,
 }
 
 pub struct InitializeInterestBearingMintInstructionAccounts {
-    pub mint: solana_sdk::pubkey::Pubkey,
+    pub mint: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for InitializeInterestBearingMint {
     type ArrangedAccounts = InitializeInterestBearingMintInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [mint, _remaining @ ..] = accounts else {
             return None;

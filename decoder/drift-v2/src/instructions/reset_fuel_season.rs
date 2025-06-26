@@ -7,17 +7,17 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct ResetFuelSeason {}
 
 pub struct ResetFuelSeasonInstructionAccounts {
-    pub user_stats: solana_sdk::pubkey::Pubkey,
-    pub authority: solana_sdk::pubkey::Pubkey,
-    pub state: solana_sdk::pubkey::Pubkey,
-    pub admin: solana_sdk::pubkey::Pubkey,
+    pub user_stats: solana_pubkey::Pubkey,
+    pub authority: solana_pubkey::Pubkey,
+    pub state: solana_pubkey::Pubkey,
+    pub admin: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for ResetFuelSeason {
     type ArrangedAccounts = ResetFuelSeasonInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [user_stats, authority, state, admin, _remaining @ ..] = accounts else {
             return None;

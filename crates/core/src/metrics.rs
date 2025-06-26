@@ -1,7 +1,7 @@
 //! A trait for collecting and managing performance metrics within the pipeline.
 //!
 //! The `Metrics` trait defines a set of asynchronous methods for initializing,
-//! updating, flushing, and shutting down metrics in the `indexer-core`
+//! updating, flushing, and shutting down metrics in the `solana-indexer-core`
 //! framework. This trait is designed for tracking various types of metrics,
 //! such as counters, gauges, and histograms, to monitor performance and
 //! operational health in real time.

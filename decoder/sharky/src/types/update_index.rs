@@ -5,5 +5,5 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 )]
 pub struct UpdateIndex {
     pub index: u32,
-    pub mint: solana_sdk::pubkey::Pubkey,
+    pub mint: solana_pubkey::Pubkey,
 }

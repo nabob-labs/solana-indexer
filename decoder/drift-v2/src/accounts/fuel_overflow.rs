@@ -3,7 +3,7 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(IndexerDeserialize, Debug)]
 #[indexer(discriminator = "0xb640e7b1e28e453a")]
 pub struct FuelOverflow {
-    pub authority: solana_sdk::pubkey::Pubkey,
+    pub authority: solana_pubkey::Pubkey,
     pub fuel_insurance: u128,
     pub fuel_deposits: u128,
     pub fuel_borrows: u128,

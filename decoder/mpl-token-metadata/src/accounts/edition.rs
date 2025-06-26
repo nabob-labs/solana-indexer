@@ -6,6 +6,6 @@ use {
 #[derive(IndexerDeserialize, Debug)]
 pub struct Edition {
     pub key: Key,
-    pub parent: solana_sdk::pubkey::Pubkey,
+    pub parent: solana_pubkey::Pubkey,
     pub edition: u64,
 }

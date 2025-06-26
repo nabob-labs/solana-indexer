@@ -1,32 +1,31 @@
-use solana_indexer_core::{borsh, IndexerDeserialize};
-#[derive(
-    IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
-)]
-#[indexer(discriminator = "0x08")]
+use solana_indexer_core::{borsh, deserialize::U64PrefixString, IndexerDeserialize};
+
+#[derive(IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone)]
+#[indexer(discriminator = "0x09000000")]
 pub struct AllocateWithSeed {
-    pub base: solana_sdk::pubkey::Pubkey,
-    pub seed: String,
+    pub base: solana_pubkey::Pubkey,
+    pub seed: U64PrefixString,
     pub space: u64,
-    pub owner: solana_sdk::pubkey::Pubkey,
+    pub program_address: solana_pubkey::Pubkey,
 }
 
-pub struct AllocateWithSeedAccounts {
-    pub allocated_account: solana_sdk::pubkey::Pubkey,
-    pub base_account: solana_sdk::pubkey::Pubkey,
+pub struct AllocateWithSeedInstructionAccounts {
+    pub new_account: solana_pubkey::Pubkey,
+    pub base_account: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for AllocateWithSeed {
-    type ArrangedAccounts = AllocateWithSeedAccounts;
+    type ArrangedAccounts = AllocateWithSeedInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
-        let [allocated_account, base_account, _remaining @ ..] = accounts else {
+        let [new_account, base_account, _remaining @ ..] = accounts else {
             return None;
         };
 
-        Some(AllocateWithSeedAccounts {
-            allocated_account: allocated_account.pubkey,
+        Some(AllocateWithSeedInstructionAccounts {
+            new_account: new_account.pubkey,
             base_account: base_account.pubkey,
         })
     }

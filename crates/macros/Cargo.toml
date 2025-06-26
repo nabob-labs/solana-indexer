@@ -8,12 +8,6 @@ license.workspace = true
 edition.workspace = true
 
 [dependencies]
-solana-client = { workspace = true }
-solana-sdk = { workspace = true }
-solana-transaction-status = { workspace = true }
-
-hex = { workspace = true }
-paste = { workspace = true }
 
 [lib]
 crate-type = ["rlib"]

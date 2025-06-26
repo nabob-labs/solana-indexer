@@ -1,17 +1,18 @@
 use {
     async_trait::async_trait,
+    futures::StreamExt,
+    solana_account::Account,
+    solana_client::{
+        nonblocking::pubsub_client::PubsubClient, rpc_config::RpcProgramAccountsConfig,
+    },
     solana_indexer_core::{
         datasource::{AccountUpdate, Datasource, Update, UpdateType},
         error::IndexerResult,
         metrics::MetricsCollection,
     },
-    futures::StreamExt,
-    solana_client::{
-        nonblocking::pubsub_client::PubsubClient, rpc_config::RpcProgramAccountsConfig,
-    },
-    solana_sdk::{account::Account, pubkey::Pubkey},
+    solana_pubkey::Pubkey,
     std::{str::FromStr, sync::Arc, time::Duration},
-    tokio::sync::mpsc::UnboundedSender,
+    tokio::sync::mpsc::Sender,
     tokio_util::sync::CancellationToken,
 };
 
@@ -25,7 +26,10 @@ pub struct Filters {
 }
 
 impl Filters {
-    pub fn new(pubkey: Pubkey, program_subscribe_config: Option<RpcProgramAccountsConfig>) -> Self {
+    pub const fn new(
+        pubkey: Pubkey,
+        program_subscribe_config: Option<RpcProgramAccountsConfig>,
+    ) -> Self {
         Filters {
             pubkey,
             program_subscribe_config,
@@ -39,7 +43,7 @@ pub struct RpcProgramSubscribe {
 }
 
 impl RpcProgramSubscribe {
-    pub fn new(rpc_ws_url: String, filters: Filters) -> Self {
+    pub const fn new(rpc_ws_url: String, filters: Filters) -> Self {
         Self {
             rpc_ws_url,
             filters,
@@ -51,7 +55,7 @@ impl RpcProgramSubscribe {
 impl Datasource for RpcProgramSubscribe {
     async fn consume(
         &self,
-        sender: &UnboundedSender<Update>,
+        sender: Sender<Update>,
         cancellation_token: CancellationToken,
         metrics: Arc<MetricsCollection>,
     ) -> IndexerResult<()> {
@@ -144,7 +148,7 @@ impl Datasource for RpcProgramSubscribe {
                                     .await
                                     .unwrap_or_else(|value| log::error!("Error recording metric: {}", value));
 
-                                if let Err(err) = sender_clone.send(update) {
+                                if let Err(err) = sender_clone.try_send(update) {
                                     log::error!("Error sending account update: {:?}", err);
                                     break;
                                 }

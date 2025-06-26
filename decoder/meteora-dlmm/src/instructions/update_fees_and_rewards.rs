@@ -6,19 +6,20 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[indexer(discriminator = "0x9ae6fa0decd14bdf")]
 pub struct UpdateFeesAndRewards {}
 
+#[derive(Debug, PartialEq, Eq, Clone, Hash, serde::Serialize, serde::Deserialize)]
 pub struct UpdateFeesAndRewardsInstructionAccounts {
-    pub position: solana_sdk::pubkey::Pubkey,
-    pub lb_pair: solana_sdk::pubkey::Pubkey,
-    pub bin_array_lower: solana_sdk::pubkey::Pubkey,
-    pub bin_array_upper: solana_sdk::pubkey::Pubkey,
-    pub owner: solana_sdk::pubkey::Pubkey,
+    pub position: solana_pubkey::Pubkey,
+    pub lb_pair: solana_pubkey::Pubkey,
+    pub bin_array_lower: solana_pubkey::Pubkey,
+    pub bin_array_upper: solana_pubkey::Pubkey,
+    pub owner: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for UpdateFeesAndRewards {
     type ArrangedAccounts = UpdateFeesAndRewardsInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [position, lb_pair, bin_array_lower, bin_array_upper, owner, _remaining @ ..] =
             accounts

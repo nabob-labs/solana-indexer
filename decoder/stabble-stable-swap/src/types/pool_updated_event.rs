@@ -6,6 +6,6 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
 pub struct PoolUpdatedEvent {
-    pub pubkey: solana_sdk::pubkey::Pubkey,
+    pub pubkey: solana_pubkey::Pubkey,
     pub data: PoolUpdatedData,
 }

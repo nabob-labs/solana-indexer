@@ -3,7 +3,7 @@ use {
     solana_indexer_core::{borsh, IndexerDeserialize},
 };
 
-pub(crate) const TARGET_ORDERS_SIZE: usize = std::mem::size_of::<TargetOrders>();
+pub const TARGET_ORDERS_SIZE: usize = core::mem::size_of::<TargetOrders>();
 
 #[derive(IndexerDeserialize, Debug)]
 pub struct TargetOrders {

@@ -25,12 +25,12 @@ pub enum RaydiumLiquidityLockingInstruction {
     SettleCpFeeEvent(settle_cp_fee_event::SettleCpFeeEvent),
 }
 
-impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for RaydiumLiquidityLockingDecoder {
+impl solana_indexer_core::instruction::InstructionDecoder<'_> for RaydiumLiquidityLockingDecoder {
     type InstructionType = RaydiumLiquidityLockingInstruction;
 
     fn decode_instruction(
         &self,
-        instruction: &solana_sdk::instruction::Instruction,
+        instruction: &solana_instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
         if !instruction.program_id.eq(&PROGRAM_ID) {
             return None;

@@ -7,18 +7,18 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct UpdatePerpBidAskTwap {}
 
 pub struct UpdatePerpBidAskTwapInstructionAccounts {
-    pub state: solana_sdk::pubkey::Pubkey,
-    pub perp_market: solana_sdk::pubkey::Pubkey,
-    pub oracle: solana_sdk::pubkey::Pubkey,
-    pub keeper_stats: solana_sdk::pubkey::Pubkey,
-    pub authority: solana_sdk::pubkey::Pubkey,
+    pub state: solana_pubkey::Pubkey,
+    pub perp_market: solana_pubkey::Pubkey,
+    pub oracle: solana_pubkey::Pubkey,
+    pub keeper_stats: solana_pubkey::Pubkey,
+    pub authority: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for UpdatePerpBidAskTwap {
     type ArrangedAccounts = UpdatePerpBidAskTwapInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [state, perp_market, oracle, keeper_stats, authority, _remaining @ ..] = accounts
         else {

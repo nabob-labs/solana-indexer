@@ -3,7 +3,7 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
-#[indexer(discriminator = "0xe445a52e51cb9a1ded7094e63954b4a2")]
+#[indexer(discriminator = "0xed7094e63954b4a2")]
 pub struct LiquidityCalculateEvent {
     pub pool_liquidity: u128,
     pub pool_sqrt_price_x64: u128,

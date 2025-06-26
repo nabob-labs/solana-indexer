@@ -5,5 +5,5 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 )]
 pub struct Collection {
     pub verified: bool,
-    pub key: solana_sdk::pubkey::Pubkey,
+    pub key: solana_pubkey::Pubkey,
 }

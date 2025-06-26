@@ -15,7 +15,7 @@
 //! - **`NestedInstruction`**: Represents instructions with potential nested
 //!   inner instructions, allowing for recursive processing.
 //!
-//! These components enable the `indexer-core` framework to handle Solana
+//! These components enable the `solana-indexer-core` framework to handle Solana
 //! transaction instructions efficiently, decoding them into structured types
 //! and facilitating hierarchical processing.
 
@@ -25,9 +25,13 @@ use {
         transaction::TransactionMetadata,
     },
     async_trait::async_trait,
-    serde::Deserialize,
-    solana_sdk::{instruction::AccountMeta, pubkey::Pubkey},
-    std::{ops::Deref, sync::Arc},
+    serde::{Deserialize, Serialize},
+    solana_instruction::AccountMeta,
+    solana_pubkey::Pubkey,
+    std::{
+        ops::{Deref, DerefMut},
+        sync::Arc,
+    },
 };
 
 /// Metadata associated with a specific instruction, including transaction-level
@@ -41,17 +45,23 @@ use {
 ///
 /// - `transaction_metadata`: Metadata providing details of the entire
 ///   transaction.
-/// - `stack_height`: Represents the instruction’s depth within the stack, where
-///   0 is the root level.
+/// - `stack_height`: Represents the instruction's depth within the stack, where
+///   1 is the root level.
+/// - `index`: The index of the instruction in the transaction. The index is
+///   relative within stack height and is 1-based. Note that the inner
+///   instruction indexes are grouped into one vector, so different inner
+///   instructions that have different stack heights may have continuous
+///   indexes.
 
 #[derive(Debug, Clone)]
 pub struct InstructionMetadata {
-    pub transaction_metadata: TransactionMetadata,
+    pub transaction_metadata: Arc<TransactionMetadata>,
     pub stack_height: u32,
+    pub index: u32,
+    pub absolute_path: Vec<u8>,
 }
 
-pub type InstructionsWithMetadata =
-    Vec<(InstructionMetadata, solana_sdk::instruction::Instruction)>;
+pub type InstructionsWithMetadata = Vec<(InstructionMetadata, solana_instruction::Instruction)>;
 
 /// A decoded instruction containing program ID, data, and associated accounts.
 ///
@@ -70,7 +80,7 @@ pub type InstructionsWithMetadata =
 /// - `accounts`: A vector of `AccountMeta`, representing the accounts involved
 ///   in the instruction.
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DecodedInstruction<T> {
     pub program_id: Pubkey,
     pub data: T,
@@ -97,7 +107,7 @@ pub trait InstructionDecoder<'a> {
 
     fn decode_instruction(
         &self,
-        instruction: &'a solana_sdk::instruction::Instruction,
+        instruction: &'a solana_instruction::Instruction,
     ) -> Option<DecodedInstruction<Self::InstructionType>>;
 }
 
@@ -107,7 +117,8 @@ pub trait InstructionDecoder<'a> {
 pub type InstructionProcessorInputType<T> = (
     InstructionMetadata,
     DecodedInstruction<T>,
-    Vec<NestedInstruction>,
+    NestedInstructions,
+    solana_instruction::Instruction,
 );
 
 /// A processing pipeline for instructions, using a decoder and processor.
@@ -172,6 +183,7 @@ impl<T: Send + 'static> InstructionPipes<'_> for InstructionPipe<T> {
                         nested_instruction.metadata.clone(),
                         decoded_instruction,
                         nested_instruction.inner_instructions.clone(),
+                        nested_instruction.instruction.clone(),
                     ),
                     metrics.clone(),
                 )
@@ -202,16 +214,24 @@ impl<T: Send + 'static> InstructionPipes<'_> for InstructionPipe<T> {
 #[derive(Debug, Clone)]
 pub struct NestedInstruction {
     pub metadata: InstructionMetadata,
-    pub instruction: solana_sdk::instruction::Instruction,
-    pub inner_instructions: Vec<NestedInstruction>,
+    pub instruction: solana_instruction::Instruction,
+    pub inner_instructions: NestedInstructions,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct NestedInstructions(pub Vec<NestedInstruction>);
 
 impl NestedInstructions {
-    pub fn iter(&self) -> std::slice::Iter<NestedInstruction> {
-        self.0.iter()
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn push(&mut self, nested_instruction: NestedInstruction) {
+        self.0.push(nested_instruction);
     }
 }
 
@@ -220,6 +240,27 @@ impl Deref for NestedInstructions {
 
     fn deref(&self) -> &[NestedInstruction] {
         &self.0[..]
+    }
+}
+
+impl DerefMut for NestedInstructions {
+    fn deref_mut(&mut self) -> &mut [NestedInstruction] {
+        &mut self.0[..]
+    }
+}
+
+impl Clone for NestedInstructions {
+    fn clone(&self) -> Self {
+        NestedInstructions(self.0.clone())
+    }
+}
+
+impl IntoIterator for NestedInstructions {
+    type Item = NestedInstruction;
+    type IntoIter = std::vec::IntoIter<NestedInstruction>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 
@@ -242,39 +283,134 @@ impl Deref for NestedInstructions {
 impl From<InstructionsWithMetadata> for NestedInstructions {
     fn from(instructions: InstructionsWithMetadata) -> Self {
         log::trace!("from(instructions: {:?})", instructions);
-        let mut result = Vec::<NestedInstruction>::new();
-        let mut stack = Vec::<(Vec<usize>, usize)>::new();
 
+        // To avoid reallocations that result in dangling pointers.
+        // Therefore the number of "push"s must be calculated to set the capacity
+        let estimated_capacity = instructions
+            .iter()
+            .filter(|(meta, _)| meta.stack_height == 1)
+            .count();
+
+        UnsafeNestedBuilder::new(estimated_capacity).build(instructions)
+    }
+}
+
+// https://github.com/anza-xyz/agave/blob/master/program-runtime/src/execution_budget.rs#L7
+pub const MAX_INSTRUCTION_STACK_DEPTH: usize = 5;
+
+pub struct UnsafeNestedBuilder {
+    nested_ixs: Vec<NestedInstruction>,
+    level_ptrs: [Option<*mut NestedInstruction>; MAX_INSTRUCTION_STACK_DEPTH],
+}
+
+impl UnsafeNestedBuilder {
+    /// ## SAFETY:
+    /// Make sure `capacity` is large enough to avoid capacity expansion caused
+    /// by `push`
+    pub fn new(capacity: usize) -> Self {
+        Self {
+            nested_ixs: Vec::with_capacity(capacity),
+            level_ptrs: [None; MAX_INSTRUCTION_STACK_DEPTH],
+        }
+    }
+
+    pub fn build(mut self, instructions: InstructionsWithMetadata) -> NestedInstructions {
         for (metadata, instruction) in instructions {
-            let nested_instruction = NestedInstruction {
-                metadata: metadata.clone(),
-                instruction,
-                inner_instructions: Vec::new(),
-            };
+            let stack_height = metadata.stack_height as usize;
 
-            while let Some((_, parent_stack_height)) = stack.last() {
-                if metadata.stack_height as usize > *parent_stack_height {
-                    break;
-                }
-                stack.pop();
+            assert!(stack_height > 0);
+            assert!(stack_height <= MAX_INSTRUCTION_STACK_DEPTH);
+
+            for ptr in &mut self.level_ptrs[stack_height..] {
+                *ptr = None;
             }
 
-            if let Some((path_to_parent, _)) = stack.last() {
-                let mut current_instructions = &mut result;
-                for &index in path_to_parent {
-                    current_instructions = &mut current_instructions[index].inner_instructions;
+            let new_instruction = NestedInstruction {
+                metadata,
+                instruction,
+                inner_instructions: NestedInstructions::default(),
+            };
+
+            // SAFETY:The following operation is safe.
+            // because:
+            // 1. All pointers come from pre-allocated Vec (no extension)
+            // 2. level_ptr does not guarantee any aliasing
+            // 3. Lifecycle is limited to the build() method
+            unsafe {
+                if stack_height == 1 {
+                    self.nested_ixs.push(new_instruction);
+                    let ptr = self.nested_ixs.last_mut().unwrap_unchecked() as *mut _;
+                    self.level_ptrs[0] = Some(ptr);
+                } else if let Some(parent_ptr) = self.level_ptrs[stack_height - 2] {
+                    (*parent_ptr).inner_instructions.push(new_instruction);
+                    let ptr = (*parent_ptr)
+                        .inner_instructions
+                        .last_mut()
+                        .unwrap_unchecked() as *mut _;
+                    self.level_ptrs[stack_height - 1] = Some(ptr);
                 }
-                current_instructions.push(nested_instruction);
-                let mut new_path = path_to_parent.clone();
-                new_path.push(current_instructions.len() - 1);
-                stack.push((new_path, metadata.stack_height as usize));
-            } else {
-                result.push(nested_instruction);
-                let new_path = vec![result.len() - 1];
-                stack.push((new_path, metadata.stack_height as usize));
             }
         }
 
-        NestedInstructions(result)
+        NestedInstructions(self.nested_ixs)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use {super::*, solana_instruction::Instruction};
+
+    fn create_instruction_with_metadata(
+        index: u32,
+        stack_height: u32,
+    ) -> (InstructionMetadata, Instruction) {
+        let metadata = InstructionMetadata {
+            transaction_metadata: Arc::default(),
+            stack_height,
+            index,
+            absolute_path: vec![],
+        };
+        let instruction = Instruction {
+            program_id: Pubkey::new_unique(),
+            accounts: vec![AccountMeta::new(Pubkey::new_unique(), false)],
+            data: vec![],
+        };
+        (metadata, instruction)
+    }
+
+    #[test]
+    fn test_nested_instructions_single_level() {
+        let instructions = vec![
+            create_instruction_with_metadata(1, 1),
+            create_instruction_with_metadata(2, 1),
+        ];
+        let nested_instructions: NestedInstructions = instructions.into();
+        assert_eq!(nested_instructions.len(), 2);
+        assert!(nested_instructions[0].inner_instructions.is_empty());
+        assert!(nested_instructions[1].inner_instructions.is_empty());
+    }
+
+    #[test]
+    fn test_nested_instructions_empty() {
+        let instructions: InstructionsWithMetadata = vec![];
+        let nested_instructions: NestedInstructions = instructions.into();
+        assert!(nested_instructions.is_empty());
+    }
+
+    #[test]
+    fn test_deep_nested_instructions() {
+        let instructions = vec![
+            create_instruction_with_metadata(0, 1),
+            create_instruction_with_metadata(0, 1),
+            create_instruction_with_metadata(1, 2),
+            create_instruction_with_metadata(1, 3),
+            create_instruction_with_metadata(1, 3),
+            create_instruction_with_metadata(1, 3),
+        ];
+
+        let nested_instructions: NestedInstructions = instructions.into();
+        assert_eq!(nested_instructions.len(), 2);
+        assert_eq!(nested_instructions.0[1].inner_instructions.len(), 1);
     }
 }

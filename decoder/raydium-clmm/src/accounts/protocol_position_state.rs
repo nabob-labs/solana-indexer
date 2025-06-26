@@ -4,7 +4,7 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[indexer(discriminator = "0x64e2916392daa06a")]
 pub struct ProtocolPositionState {
     pub bump: u8,
-    pub pool_id: solana_sdk::pubkey::Pubkey,
+    pub pool_id: solana_pubkey::Pubkey,
     pub tick_lower_index: i32,
     pub tick_upper_index: i32,
     pub liquidity: u128,

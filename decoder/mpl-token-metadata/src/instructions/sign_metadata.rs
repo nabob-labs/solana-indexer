@@ -7,15 +7,15 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct SignMetadata {}
 
 pub struct SignMetadataInstructionAccounts {
-    pub metadata: solana_sdk::pubkey::Pubkey,
-    pub creator: solana_sdk::pubkey::Pubkey,
+    pub metadata: solana_pubkey::Pubkey,
+    pub creator: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for SignMetadata {
     type ArrangedAccounts = SignMetadataInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [metadata, creator, _remaining @ ..] = accounts else {
             return None;

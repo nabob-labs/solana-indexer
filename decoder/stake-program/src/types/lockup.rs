@@ -6,5 +6,5 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct Lockup {
     pub unix_timestamp: i64,
     pub epoch: u64,
-    pub custodian: solana_sdk::pubkey::Pubkey,
+    pub custodian: solana_pubkey::Pubkey,
 }

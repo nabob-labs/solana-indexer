@@ -1,5 +1,5 @@
 //! Provides traits and utility functions for deserialization and account
-//! arrangement within the `indexer-core` framework.
+//! arrangement within the `solana-indexer-core` framework.
 //!
 //! This module includes the `IndexerDeserialize` trait for custom
 //! deserialization of data types, the `extract_discriminator` function for
@@ -34,7 +34,7 @@ use std::{
 ///
 /// The `IndexerDeserialize` trait provides a method for deserializing instances
 /// of a type from raw byte slices. This is essential for parsing binary data
-/// into structured types within the `indexer-core` framework. Types implementing
+/// into structured types within the `solana-indexer-core` framework. Types implementing
 /// this trait should also implement `BorshDeserialize` to support Borsh-based
 /// serialization.
 ///
@@ -104,19 +104,14 @@ pub trait ArrangeAccounts {
     type ArrangedAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts>;
 }
 
 /// A wrapper type for strings that are prefixed with their length.
-#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone)]
-pub struct PrefixString(pub String);
 
-impl Default for PrefixString {
-    fn default() -> Self {
-        Self(String::default())
-    }
-}
+#[derive(serde::Serialize, serde::Deserialize, Default, PartialEq, Eq, Clone)]
+pub struct PrefixString(pub String);
 
 impl Deref for PrefixString {
     type Target = String;
@@ -146,6 +141,48 @@ impl crate::borsh::BorshDeserialize for PrefixString {
         let mut buffer = vec![0u8; 4];
         reader.read_exact(&mut buffer)?;
         let length = u32::deserialize(&mut buffer.as_slice())?;
+        let mut buffer = vec![0u8; length as usize];
+        reader.read_exact(&mut buffer)?;
+
+        Ok(Self(String::from_utf8(buffer).map_err(|_| {
+            Error::new(ErrorKind::InvalidData, "invalid utf8")
+        })?))
+    }
+}
+
+/// A wrapper type for strings that are prefixed with their length.
+
+#[derive(serde::Serialize, Default, serde::Deserialize, PartialEq, Eq, Clone)]
+pub struct U64PrefixString(pub String);
+
+impl Deref for U64PrefixString {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<U64PrefixString> for String {
+    fn from(val: U64PrefixString) -> Self {
+        val.0
+    }
+}
+
+impl std::fmt::Debug for U64PrefixString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{:?}", self.0))
+    }
+}
+
+/// Implements the `IndexerDeserialize` trait for `U64PrefixString`.
+impl crate::borsh::BorshDeserialize for U64PrefixString {
+    #[inline]
+    fn deserialize_reader<R: Read>(reader: &mut R) -> Result<Self> {
+        // read the length of the String
+        let mut buffer = vec![0u8; 8];
+        reader.read_exact(&mut buffer)?;
+        let length = u64::deserialize(&mut buffer.as_slice())?;
         let mut buffer = vec![0u8; length as usize];
         reader.read_exact(&mut buffer)?;
 

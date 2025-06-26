@@ -4,5 +4,5 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
     IndexerDeserialize, Debug, serde::Serialize, serde::Deserialize, PartialEq, Eq, Clone, Hash,
 )]
 pub struct UpdateDelegate {
-    pub additional_delegates: Vec<solana_sdk::pubkey::Pubkey>,
+    pub additional_delegates: Vec<solana_pubkey::Pubkey>,
 }

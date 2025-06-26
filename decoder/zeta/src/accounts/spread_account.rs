@@ -5,7 +5,7 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[derive(IndexerDeserialize, Debug)]
 #[indexer(discriminator = "0x3982fc88a7b12fa2")]
 pub struct SpreadAccount {
-    pub authority: solana_sdk::pubkey::Pubkey,
+    pub authority: solana_pubkey::Pubkey,
     pub nonce: u8,
     pub balance: u64,
     pub series_expiry: [u64; 5],

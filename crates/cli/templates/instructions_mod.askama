@@ -26,7 +26,7 @@ impl<'a> solana_indexer_core::instruction::InstructionDecoder<'a> for {{ decoder
 
     fn decode_instruction(
         &self,
-        instruction: &solana_sdk::instruction::Instruction,
+        instruction: &solana_instruction::Instruction,
     ) -> Option<solana_indexer_core::instruction::DecodedInstruction<Self::InstructionType>> {
         solana_indexer_core::try_decode_instructions!(instruction,
             {%- for instruction in instructions %}

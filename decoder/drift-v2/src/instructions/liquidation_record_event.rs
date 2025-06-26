@@ -9,8 +9,8 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct LiquidationRecordEvent {
     pub ts: i64,
     pub liquidation_type: LiquidationType,
-    pub user: solana_sdk::pubkey::Pubkey,
-    pub liquidator: solana_sdk::pubkey::Pubkey,
+    pub user: solana_pubkey::Pubkey,
+    pub liquidator: solana_pubkey::Pubkey,
     pub margin_requirement: u128,
     pub total_collateral: i128,
     pub margin_freed: u64,

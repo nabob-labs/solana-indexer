@@ -6,22 +6,23 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 #[indexer(discriminator = "0x7b86510031446262")]
 pub struct ClosePosition {}
 
+#[derive(Debug, PartialEq, Eq, Clone, Hash, serde::Serialize, serde::Deserialize)]
 pub struct ClosePositionInstructionAccounts {
-    pub position: solana_sdk::pubkey::Pubkey,
-    pub lb_pair: solana_sdk::pubkey::Pubkey,
-    pub bin_array_lower: solana_sdk::pubkey::Pubkey,
-    pub bin_array_upper: solana_sdk::pubkey::Pubkey,
-    pub sender: solana_sdk::pubkey::Pubkey,
-    pub rent_receiver: solana_sdk::pubkey::Pubkey,
-    pub event_authority: solana_sdk::pubkey::Pubkey,
-    pub program: solana_sdk::pubkey::Pubkey,
+    pub position: solana_pubkey::Pubkey,
+    pub lb_pair: solana_pubkey::Pubkey,
+    pub bin_array_lower: solana_pubkey::Pubkey,
+    pub bin_array_upper: solana_pubkey::Pubkey,
+    pub sender: solana_pubkey::Pubkey,
+    pub rent_receiver: solana_pubkey::Pubkey,
+    pub event_authority: solana_pubkey::Pubkey,
+    pub program: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for ClosePosition {
     type ArrangedAccounts = ClosePositionInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [position, lb_pair, bin_array_lower, bin_array_upper, sender, rent_receiver, event_authority, program, _remaining @ ..] =
             accounts

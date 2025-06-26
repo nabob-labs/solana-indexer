@@ -1,7 +1,11 @@
 use {
-    crate::{idl::Idl, legacy_idl::LegacyIdl, util::idl_type_to_rust_type},
+    crate::{
+        idl::Idl,
+        legacy_idl::LegacyIdl,
+        util::{idl_type_to_rust_type, is_big_array},
+    },
     askama::Template,
-    heck::{ToSnekCase, ToUpperCamelCase},
+    heck::{ToSnakeCase, ToUpperCamelCase},
     sha2::{Digest, Sha256},
 };
 
@@ -20,6 +24,7 @@ pub struct AccountData {
 pub struct FieldData {
     pub name: String,
     pub rust_type: String,
+    pub attributes: Option<String>,
 }
 
 #[derive(Template)]
@@ -41,7 +46,7 @@ pub fn legacy_process_accounts(idl: &LegacyIdl) -> Vec<AccountData> {
 
     for account in &idl.accounts {
         let mut requires_imports = false;
-        let module_name = account.name.to_snek_case();
+        let module_name = account.name.to_snake_case();
         let struct_name = account.name.to_upper_camel_case();
         // TODO: Might be a problem
         let discriminator =
@@ -55,9 +60,15 @@ pub fn legacy_process_accounts(idl: &LegacyIdl) -> Vec<AccountData> {
                 if rust_type.1 {
                     requires_imports = true;
                 }
+                let attributes = if is_big_array(&rust_type.0) {
+                    Some("#[serde(with = \"serde_big_array::BigArray\")]".to_string())
+                } else {
+                    None
+                };
                 fields.push(FieldData {
-                    name: field.name.to_snek_case(),
+                    name: field.name.to_snake_case(),
                     rust_type: rust_type.0,
+                    attributes,
                 });
             }
         }
@@ -79,7 +90,7 @@ pub fn process_accounts(idl: &Idl) -> Vec<AccountData> {
 
     for account in &idl.accounts {
         let mut requires_imports = false;
-        let module_name = account.name.to_snek_case();
+        let module_name = account.name.to_snake_case();
         let struct_name = account.name.to_upper_camel_case();
         let discriminator = compute_account_discriminator(&account.discriminator);
 
@@ -93,9 +104,15 @@ pub fn process_accounts(idl: &Idl) -> Vec<AccountData> {
                         if rust_type.1 {
                             requires_imports = true;
                         }
+                        let attributes = if is_big_array(&rust_type.0) {
+                            Some("#[serde(with = \"serde_big_array::BigArray\")]".to_string())
+                        } else {
+                            None
+                        };
                         account_fields.push(FieldData {
-                            name: field.name.to_snek_case(),
+                            name: field.name.to_snake_case(),
                             rust_type: rust_type.0,
+                            attributes,
                         });
                     }
                 }

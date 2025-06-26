@@ -1,6 +1,6 @@
 use solana_indexer_core::{borsh, IndexerDeserialize};
 
-pub(crate) const FEES_SIZE: usize = std::mem::size_of::<Fees>();
+pub const FEES_SIZE: usize = core::mem::size_of::<Fees>();
 
 #[derive(
     IndexerDeserialize, Debug, serde::Deserialize, serde::Serialize, PartialEq, Eq, Clone, Hash,

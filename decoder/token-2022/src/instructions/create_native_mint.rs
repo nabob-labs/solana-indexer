@@ -7,16 +7,16 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct CreateNativeMint {}
 
 pub struct CreateNativeMintInstructionAccounts {
-    pub payer: solana_sdk::pubkey::Pubkey,
-    pub native_mint: solana_sdk::pubkey::Pubkey,
-    pub system_program: solana_sdk::pubkey::Pubkey,
+    pub payer: solana_pubkey::Pubkey,
+    pub native_mint: solana_pubkey::Pubkey,
+    pub system_program: solana_pubkey::Pubkey,
 }
 
 impl solana_indexer_core::deserialize::ArrangeAccounts for CreateNativeMint {
     type ArrangedAccounts = CreateNativeMintInstructionAccounts;
 
     fn arrange_accounts(
-        accounts: &[solana_sdk::instruction::AccountMeta],
+        accounts: &[solana_instruction::AccountMeta],
     ) -> Option<Self::ArrangedAccounts> {
         let [payer, native_mint, system_program, _remaining @ ..] = accounts else {
             return None;

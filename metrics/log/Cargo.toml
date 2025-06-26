@@ -12,6 +12,8 @@ solana-indexer-core = { workspace = true }
 
 async-trait = { workspace = true }
 log = { workspace = true }
+metrics = { workspace = true }
+metrics-exporter-prometheus = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 
 [lib]

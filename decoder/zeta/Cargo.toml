@@ -12,8 +12,8 @@ crate-type = ["rlib"]
 
 [dependencies]
 solana-indexer-core = { workspace = true }
-solana-indexer-macros = { workspace = true }
-solana-indexer-proc-macros = { workspace = true }
 serde = { workspace = true }
 serde-big-array = { workspace = true }
-solana-sdk = { workspace = true }
+solana-account = { workspace = true }
+solana-instruction = { workspace = true, default-features = false }
+solana-pubkey = { workspace = true }

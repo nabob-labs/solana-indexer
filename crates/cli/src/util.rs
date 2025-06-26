@@ -8,7 +8,7 @@ use {
 };
 
 pub fn legacy_read_idl(idl_path: &str) -> Result<LegacyIdl> {
-    let file = File::open(idl_path).unwrap();
+    let file = File::open(idl_path).expect("Failed to open file");
 
     match serde_json::from_reader(file) {
         Ok(idl) => Ok(idl),
@@ -20,7 +20,7 @@ pub fn legacy_read_idl(idl_path: &str) -> Result<LegacyIdl> {
 }
 
 pub fn read_idl(idl_path: &str) -> Result<Idl> {
-    let file = File::open(idl_path).unwrap();
+    let file = File::open(idl_path).expect("Failed to open file");
     match serde_json::from_reader(file) {
         Ok(idl) => Ok(idl),
         Err(e) => {
@@ -48,8 +48,8 @@ pub fn idl_type_to_rust_type(idl_type: &LegacyIdlType) -> (String, bool) {
             "f64" => ("f64".to_string(), false),
             "bytes" => ("Vec<u8>".to_string(), false),
             "string" => ("String".to_string(), false),
-            "publicKey" => ("solana_sdk::pubkey::Pubkey".to_string(), false),
-            "pubkey" => ("solana_sdk::pubkey::Pubkey".to_string(), false),
+            "publicKey" => ("solana_pubkey::Pubkey".to_string(), false),
+            "pubkey" => ("solana_pubkey::Pubkey".to_string(), false),
             _ => (s.clone(), true),
         },
         LegacyIdlType::Array { array } => {
@@ -110,8 +110,8 @@ pub fn idl_type_to_rust_type(idl_type: &LegacyIdlType) -> (String, bool) {
             "f64" => ("f64".to_string(), false),
             "bytes" => ("Vec<u8>".to_string(), false),
             "string" => ("String".to_string(), false),
-            "publicKey" => ("solana_sdk::pubkey::Pubkey".to_string(), false),
-            "pubkey" => ("solana_sdk::pubkey::Pubkey".to_string(), false),
+            "publicKey" => ("solana_pubkey::Pubkey".to_string(), false),
+            "pubkey" => ("solana_pubkey::Pubkey".to_string(), false),
             _ => (option.clone(), true),
         },
     }

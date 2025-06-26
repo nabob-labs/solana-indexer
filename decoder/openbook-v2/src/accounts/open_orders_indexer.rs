@@ -5,5 +5,5 @@ use solana_indexer_core::{borsh, IndexerDeserialize};
 pub struct OpenOrdersIndexer {
     pub bump: u8,
     pub created_counter: u32,
-    pub addresses: Vec<solana_sdk::pubkey::Pubkey>,
+    pub addresses: Vec<solana_pubkey::Pubkey>,
 }

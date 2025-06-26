@@ -13,5 +13,10 @@ crate-type = ["rlib"]
 [dependencies]
 solana-indexer-core = { workspace = true }
 serde = { workspace = true }
-solana-sdk = { workspace = true }
-spl-token = { workspace = true }
+solana-account = { workspace = true }
+solana-instruction = { workspace = true, default-features = false }
+solana-program = { workspace = true }
+solana-pubkey = { workspace = true }
+
+[dev-dependencies]
+solana-indexer-test-utils = { workspace = true }
